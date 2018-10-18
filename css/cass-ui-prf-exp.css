@@ -264,6 +264,8 @@ input:checked~.switch-paddle {
 }
 
 /* ---- MISC ---- */
+
+#profileHeader,
 #circleFocusSummaryName {
     cursor: pointer;
 }

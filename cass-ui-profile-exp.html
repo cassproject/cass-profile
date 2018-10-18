@@ -15,6 +15,52 @@
 <body>
 
     <div class="sticky" data-sticky data-margin-top="0">
+        <!-- PROFILE MENUS -->
+        <div id="section-sub-menu">
+            <!-- PROFILE EXPLORER MENU -->
+            <div class="grid-container full">
+                <div class="grid-x grid-padding-x grid-padding-y">
+                    <div class="cell medium-10">
+                        <h2 id="profileHeader" onclick="goToDisplayRoot()"><i class="fa fa-user-circle" aria-hidden="true"></i> <span id="profileName"></span></h2>
+                    </div>
+                    <div class="cell medium-2">
+                        <div id="page-tools" style="display:none">
+                            <ul class="dropdown menu" data-dropdown-menu>
+                                <li>
+                                    <a href="#">Actions</a>
+                                    <ul class="menu vertical">
+                                        <li><a title="Open My Profile" onclick="setProfileUserAsLoggedInUserAndGo();"><i class="fa fa-user" aria-hidden="true"></i> My Profile</a></li>
+                                        <li><a title="Find Another Profile" onclick="setUpForProfileUserSearch();"><i class="fa fa-users" aria-hidden="true"></i> Find Profile</a></li>
+                                    </ul>
+                                </li>
+                                <li id="displayedProfileTools">
+                                    <a href="#">Tools</a>
+                                    <ul class="menu vertical">
+                                        <li><a title="Validate Claims" onclick="openProfileExpAssertionValidateModal();"><i class="fa fa-handshake-o" aria-hidden="true"></i> Validate</a></li>
+                                        <li><a title="Print Framework"><i class="fa fa-print" aria-hidden="true"></i> Print</a></li>
+                                        <li><a title="Export Framework"><i class="fa fa-download" aria-hidden="true"></i> Export</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-x grid-padding-x">
+                    <div class="cell medium-8">
+                        <button id="showGraphViewBtn" class="secondary button" onclick="showGraphViewMainContentsScreen();clearProfileSearchBar();">Graph View</button>
+                        <button id="showListViewBtn" class="secondary button" onclick="showListViewMainContentsScreen();clearProfileSearchBar();">List View</button>
+                    </div>
+                    <div class="cell medium-4">
+                        <div id="profileSearchContainer" class="input-group" style="display:none">
+                            <input onkeypress="checkForProfileSearchbarEnter(event)" id="profileSearchInput" class="input-group-field" type="text" placeholder="Search this profile">
+                            <div class="input-group-button">
+                                <button class="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!--END sticky menu container -->
 
@@ -45,16 +91,122 @@
     <!--END ERROR-->
 
     <!--WARNINGS-->
+    <div id="noProfileDataContainer" class="cassUiHighLevelWarning" style="display: none;">
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x grid-padding-y">
+                <div class="cell medium-12 centerText">
+                    <div class="callout warning large cassUiCallout">
+                        <h4><i class="fa fa-exclamation-triangle"></i>  No profile data available</h4>
+                        <p> Cannot locate any of your profile data</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!--END WARNINGS-->
+
+    <!--USER SEARCH-->
+    <div id="profileUserSearchContainer" style="display: none">
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x grid-padding-y">
+                <div class="cell medium-12" style="padding-bottom:0">
+                    <h4>Explore profile</h4>
+                    <p>Select a user to begin exploring their profile</p>
+                </div>
+                <div class="cell medium-12 centerText" style="padding-top:0">
+                    <div class="input-group">
+                        <input onkeypress="checkForProfileUserSearchbarEnter(event)" id="profileUserSearchInput" class="input-group-field" type="text" placeholder="Find user">
+                        <div class="input-group-button">
+                            <button class="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell medium-12">
+                    <div id="noAssertionsFoundForProfileUserSearch" class="callout alert" data-closable>
+                        <h5><i class="fa fa-exclamation-circle" aria-hidden="true"></i> No Profile Data Available</h5>
+                        <p>No profile data for this user was available. Please verify you have permissions to view this user's profile data.</p>
+                        <button class="close-button" aria-label="Dismiss alert" type="button" data-close>
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--END USER SEARCH-->
 
     <!--CONTENTS-->
     <div id="cassUiMainContentsContainer" style="display:none">
-        LOADED CASS PROFILE EXP...
+        <!-- GRAPH VIEW SCREEN -->
+        <div id="graph-screen" class="screen">
+            <div class="grid-container full">
+                <div class="grid-y medium-grid-frame grid-padding-x">
+                    <div class="cell medium-auto medium-cell-block-container">
+                        <div class="grid-x grid-padding-x">
+                            <div id="circleFocusSummarySidebar" class="cell medium-4 large-3 medium-cell-block-y">
+                                <!--<h2 onclick="goToDisplayRoot()" id="circleFocusSummaryName"></h2>-->
+                                <h3 onclick="goToDisplayRoot()" id=""><i class="fa fa-id-card-o"></i> Profile Explorer</h3>
+                                <p id="circleFocusSummaryDesc"></p>
+                                <div id="circleFocusSummaryListContainer"></div>
+                            </div>
+                            <div class="cell auto" style="position: relative;">
+                                <div class="expCircleGraph" id="exp-circle-graph-wrapper">
+                                    <svg id="explorerCirclePack" width="500" height="500" viewBox="0 0 500 500"></svg>
+                                </div>
+                            </div>
+                            <div id="circleFocusDetailsSidebar" class="cell medium-4 large-3 medium-cell-block-y hide">
+                                <div class="grid-x">
+                                    <div class="cell medium-10">
+                                        <h3 id="circleFocusDetailsSingleName"></h3>
+                                    </div>
+                                    <div id="circleFocusCompTools" class="cell medium-2">
+                                        <i id="circleFocusCompConfIcon" class="fa fa-signal" title="Confidence" aria-hidden="true"></i>&nbsp;
+                                        <a id="circleFocusCompDetailsLink"><i class="fa fa-info-circle" title="Show more details" aria-hidden="true"></i></a>
+                                    </div>
+                                </div>
+                                <p id="circleFocusDetailsSingleDesc" class="lead"></p>
+                                <div id="circleFocusDetailsAssertionListContainer"></div>
+                                <div id="circleFocusDetailsRelListContainer">
+                                    <ul id="circleFocusDetailsRelList" class="fa-ul"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div id="compCredentialContainer" class="grid-container">
+                    <div class="grid-x grid-margin-x">
+                        <div class="cell medium-12">
+                            <h2>Credentials</h2>
+                        </div>
+                    </div>
+                    <div id="compCredentialBadgeContainer" class="grid-x grid-margin-x grid-margin-y small-up-4 medium-up-6 large-up-8"></div>
+                    <br><br>
+                    <div id="compCredentialDegreeCertsContainer" class="grid-x grid-margin-x"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIST VIEW SCREEN -->
+        <div id="list-screen" class="screen" style="display: none;">
+            <div class="grid-container">
+                <div class="cell medium-cell-block-y">
+                    <div id="filter-options">
+                        <p>View by:</p>
+                        <ul class="no-bullets">
+                            <li class="active"><a>Framework <i class="fa fa-caret-right" aria-hidden="true"></i></a></li>
+                        </ul>
+                    </div>
+                    <div id="profileListContentsContainer" class="cell">
+                        <ul class="fa-ul" id="list-screen__root"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!--END CONTENTS-->
 
     <!-- MODAL WINDOWS -->
-
     <!-- END MODAL WINDOWS -->
 
     <script src="js/vendor/jquery.js"></script>

@@ -2,7 +2,7 @@
 // CASS UI Profile Explorer UI Utility Functions
 //**************************************************************************************************
 
-//TODO implement goToDisplayRoot
+//TODO goToDisplayRoot add go to list root
 
 //**************************************************************************************************
 // Constants
@@ -35,6 +35,113 @@ const CASSUI_MODAL_ERROR_TXT = ".cassUiModalErrorText";
 
 const SHOW_GRAPH_VIEW_BTN = "#showGraphViewBtn";
 const SHOW_LIST_VIEW_BTN = "#showListViewBtn";
+
+const PROF_EXP_PAGE_TOOLS = "#page-tools";
+const PROF_DISP_TOOLS = "#displayedProfileTools";
+
+const PROFILE_NAME = "#profileName";
+const PROF_SRCH_CTR = "#profileSearchContainer";
+const PROF_SRCH_INPT = "#profileSearchInput";
+const PROF_USR_SRCH_CTR = "#profileUserSearchContainer";
+const PROF_USR_SRCH_INPT = "#profileUserSearchInput";
+
+//displayed when you search for someone and find no profile data
+const PROF_USR_SRCH_NO_ASRS = "#noAssertionsFoundForProfileUserSearch";
+//displayed when you do a view my own profile data and find no profile data
+const PROF_NO_ASRS_CTR = "#noProfileDataContainer";
+
+const PROF_CONTENTS_LIST = "#list-screen__root";
+
+const COMP_CRED_CTR = "#compCredentialContainer";
+const COMP_CRED_BADGE_CTR = "#compCredentialBadgeContainer";
+const COMP_CRED_DEG_CERT_CTR = "#compCredentialDegreeCertsContainer";
+
+const FA_CLASS_DEGREE = "fa-graduation-cap";
+const FA_CLASS_COURSE = "fa-book";
+const FA_CLASS_TRAINING = "fa-bookmark";
+const FA_CLASS_BADGE = "fa-sun-o";
+const FA_CLASS_SEMINAR = "fa-pencil-square-o";
+const FA_CLASS_CERTIFICATION = "fa-trophy";
+const FA_CLASS_CERTIFICATE = "fa-certificate";
+const FA_CLASS_DEFAULT = "fa-cogs";
+
+// Confidence Classes
+const CONF_CLASS_BASE = "fa fa-signal";
+const HIGH_CONF_CLASS = "highConf";
+const MID_HIGH_CONF_CLASS = "midHighConf";
+const MID_CONF_CLASS = "midConf";
+const MID_LOW_CONF_CLASS = "midLowConf";
+const LOW_CONF_CLASS = "lowConf";
+
+// Evidence Details Modal
+const EV_DTL_MODAL = "#modal-evidence-details";
+const EV_DTL_NAME = "#evDetEvName";
+const EV_DTL_TYPE = "#evDetEvType";
+const EV_DTL_SOURCE = "#evDetEvSource";
+const EV_DTL_DATE = "#evDetEvDate";
+const EV_DTL_EXP = "#evDetEvExp";
+const EV_DTL_ASR_ID = "#evDetAsrId";
+const EV_DTL_URL = "#evDetEvUrl";
+const EV_DTL_PRV_CTR = "#evDetPrevContainer";
+
+// Assertion Details Modal
+const ASR_DTL_MODAL = "#modal-assertion-details";
+const ASR_DTL_SOURCE = "#asrDetSource";
+const ASR_DTL_SUBJECT = "#asrDetSubject";
+const ASR_DTL_FW_CTR = "#asrDetFrameworkContainer";
+const ASR_DTL_COMP = "#asrDetCompetency";
+const ASR_DTL_LVL_LI = "#asrDetLvlLi";
+const ASR_DTL_LVL = "#asrDetLvl";
+const ASR_DTL_HOLDS = "#asrDetHolds";
+const ASR_DTL_CONF = "#asrDetConf";
+const ASR_DTL_DATE = "#asrDetEvDate";
+const ASR_DTL_EXP = "#asrDetEvExp";
+const ASR_DTL_URL = "#asrDetEvUrl";
+const ASR_DTL_EV_LI = "#asrDetEvLi";
+const ASR_DTL_EV_LIST = "#asrDetEvList";
+
+// Competency Details Modal
+const COMP_DTL_MODAL = "#modal-competency-info";
+const COMP_DTL_NAME = "#compDetCompName";
+const COMP_DTL_DESC = "#compDetCompDesc";
+const COMP_DTL_FRM_NAME = "#compDetFrameworkName";
+const COMP_DTL_CONF = "#compDetConfidence";
+const COMP_DTL_ASR_CTR = "#compDetAsrContainer";
+
+// Assertion Share Modal
+const ASR_SHARE_MODAL = "#modal-share-assertion";
+const ASR_SHARE_ASR_DESC = "#asrShareAssertionDesc";
+const ASR_SHARE_CREATE_PRTF_CTR = "#asrShareCreatePortfolioContainer";
+const ASR_SHARE_CREATE_PRTF_NAME = "#asrShareCreatePortfolioName";
+const ASR_SHARE_ASSIGN_PRTF_CTR = "#asrShareAssignPortfolioContainer";
+const ASR_SHARE_ASSIGN_PRTF_LIST = "#asrShareAssignPortfolioList";
+const ASR_SHARE_BUSY_CTR = "#asrShareBusyCtr";
+const ASR_SHARE_BYS_TEXT = "#asrShareBusyCtrText";
+const ASR_SHARE_ERROR_CTR = "#asrShareErrorCtr";
+const ASR_SHARE_ERROR_TEXT = "#asrShareErrorText";
+const ASR_SHARE_PRTF_CONTACTS_CTR = "#asrSharePortfoliContactsContainer";
+const ASR_SHARE_PRTF_CONTACTS_PRTF_NAME = "#asrSharePortfoliContactsPortfolioName";
+const ASR_SHARE_PRTF_CONTACTS_LIST = "#asrShareAssignPortfolioContactsList";
+const ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE = "#asrShareAssignPortfolioContactsPortfolioType";
+const ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP = "#asrShareAssignPortfolioContactsPortfolioTypeLookup";
+const ASR_SHARE_PRTF_CONTENS_CTR_ID_PREFIX = "asr-share-port-cont-";
+const ASR_SHARE_EX_AE_CB_ID_PREFIX = "exAe-";
+const ASR_SHARE_NEW_AE_CB_ID_PREFIX = "potAe-idx-";
+const ASR_SHARE_ASGN_CONT_CB_ID_PREFIX = "asgn-cont-";
+
+// Assertion Validate Modal
+const ASR_VALD_MODAL = "#modal-validate-assertions";
+const ASR_VALD_TYPES = "#asrValdTypes";
+const ASR_VALD_SETUP_CTR = "#asrValdSetupCtr";
+const ASR_VALD_SETUP_BTN_CTR = "#asrValdSetupBtnsCtr";
+const ASR_VALD_RESULTS_CTR = "#asrValdResultsCtr";
+const ASR_VALD_BUSY_CTR = "#asrValdBusyCtr";
+const ASR_VALD_BUSY_TEXT = "#asrValdBusyText";
+const ASR_VALD_ERROR_CTR = "#asrValdErrorCtr";
+const ASR_VALD_ERROR_TEXT = "#asrValdErrorText";
+const ASR_VALD_RESULTS_LIST_CTR = "#asrValdResultsListContainer";
+const ASR_VALD_RESULTS_LIST = "#asrValdResultsList";
+
 
 //**************************************************************************************************
 // Variables
@@ -84,7 +191,6 @@ function hidePageMainContentsContainer() {
     $(CASSUI_MAIN_CONTENTS_CTR).hide();
 }
 
-
 function showPageAsBusy(text) {
     $(CASSUI_MAIN_ERR_CTR).hide();
     $(CASSUI_HIGH_LVL_WARNING).hide();
@@ -100,7 +206,7 @@ function showPageError(text) {
     $(CASSUI_MAIN_ERR_TXT).html(text);
     $(CASSUI_MAIN_ERR_CTR).show();
     disableViewToggleButtons();
-    showOnlyOpenFrameworkTool();
+    showOnlyOpenProfileTools();
 }
 
 function disableModalInputsAndButtons() {
@@ -167,13 +273,71 @@ if ( typeof String.prototype.endsWith != 'function' ) {
 //**************************************************************************************************
 // Profile Explorer Page UI Functions
 //**************************************************************************************************
+function hideProfileSearchBar() {
+    $(PROF_SRCH_CTR).hide();
+}
+
+function showProfileSearchBar() {
+    $(PROF_SRCH_CTR).show();
+}
+
+function clearProfileSearchBar() {
+    $(PROF_SRCH_INPT).val("");
+}
+
+function hideProfileExpTools() {
+    $(PROF_EXP_PAGE_TOOLS).hide();
+    hideProfileSearchBar();
+}
+
+function showOnlyOpenProfileTools() {
+    $(PROF_DISP_TOOLS).hide();
+    $(PROF_EXP_PAGE_TOOLS).show();
+    hideProfileSearchBar();
+}
+
+function showAllProfileExpTools() {
+    $(PROF_DISP_TOOLS).show();
+    $(PROF_EXP_PAGE_TOOLS).show();
+    showProfileSearchBar();
+}
+
+function hideProfileUserSearchContainer() {
+    $(PROF_USR_SRCH_CTR).hide();
+}
+
+function showProfileUserSearchContainer() {
+    $(CASSUI_MAIN_BUSY_CTR).hide();
+    $(CASSUI_MAIN_ERR_CTR).hide();
+    $(PROF_NO_ASRS_CTR).hide();
+    $(CASSUI_MAIN_CONTENTS_CTR).hide();
+    $(PROF_USR_SRCH_NO_ASRS).hide();
+    $(PROF_USR_SRCH_CTR).show();
+}
+
+function showNoAssertionsFoundForProfileUserSearchWarning() {
+    showOnlyOpenProfileTools();
+    showProfileUserSearchContainer();
+    $(PROF_USR_SRCH_NO_ASRS).show();
+}
+
+function showNoAssertionsFoundForOwnProfileWarning() {
+    $(CASSUI_MAIN_BUSY_CTR).hide();
+    $(CASSUI_MAIN_ERR_CTR).hide();
+    $(CASSUI_MAIN_CONTENTS_CTR).hide();
+    $(PROF_NO_ASRS_CTR).show();
+}
 
 //TODO implement goToDisplayRoot
 function goToDisplayRoot() {
-    // if (hasFinishedLoading) {
-    //     //Node ID for a framework is its name..since that is the only node with a name ID, it should be fine...
-    //     zoomExpCgByD3NodeId(currentFrameworkName, true);
-    // }
+    if (hasFinishedLoading) {
+        zoomExpCgByD3NodeId(profileUserName, true);
+        //TODO goToDisplayRoot add go to list root
+    }
+}
+
+function setProfileName(name) {
+    $(PROFILE_NAME).html(name);
 }
 
 //**************************************************************************************************
