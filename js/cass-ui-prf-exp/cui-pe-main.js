@@ -2,19 +2,24 @@
 // CASS UI Profile Explorer Main Functions
 //**************************************************************************************************
 
-//TODO checkForProfileSearchbarEnter
-//TODO setProfileUserAsLoggedInUserAndGo
-//TODO setUpForProfileUserSearch
-//TODO openProfileExpAssertionValidateModal
-//TODO checkForProfileUserSearchbarEnter
 //TODO openFrameworkInFrameworkExplorer
+//TODO openProfileExpAssertionValidateModal
+//TODO showCompetencyDetailsModal
+//TODO showAssertionDetailsModal
+//TODO showEvidenceDetailsModal
 
 //TODO cleanFrameworkName expand on or get rid of
 //TODO generateEvidenceSource expand this
 //TODO loadPageContents At some point take loggedInPkPem check out and just start with setProfileUserAsLoggedInUserAndGo OR setUpForProfileUserSearch
 
 //TODO getAssertionsForD3Node fix for multi node clusters
-//TODO getAssertionsForCompetencyPackTracker fix for multi node clusters
+//TODO getAssertionsForCompetencyD3NodeTracker fix for multi node clusters
+//TODO getAssertionsForCompetencyPacketData fix for multi node clusters
+//TODO addChildToListView construct list view for multi node competency cluster
+//TODO addChildToGraphProfileSummary construct list view for multi node competency cluster
+//TODO categorizeFrameworksForSummary expand functionality
+
+//TODO expandListViewToName think of something better than name
 
 //**************************************************************************************************
 // Constants
@@ -46,9 +51,7 @@ var rawApplicableFrameworkList = [];
 var applicableFrameworkList = [];
 var applicableFrameworkMap = {};
 var competencyAssertionMap = {};
-var d3FrameworkNodeMap = {};
-var d3ProfileNode;
-var d3ProfileNodeString;
+
 var assertionEvidenceMap = {};
 var badgeList = [];
 var degreeCertList = [];
@@ -60,10 +63,6 @@ var frameworkGraphSummaryLiMap = {};
 var hasFinishedLoading = false;
 
 var evidenceTrail = [];
-
-var contactsByNameMap;
-var contactsByPkPemMap;
-var contactDisplayList;
 
 var currentAssertionShareId;
 var ecAssertionSearchReturnList;
@@ -82,12 +81,10 @@ var assertionValidationResultsMap;
 
 var lastExpCgSidebarD3NodeName = "";
 
-//TODO fix these
 var frameworkNodePacketGraphMap = {};
-var competencyClusterNodeArrayMap = {};
-//var competencyPackTrackerMapByName = {}; //this could probably be removed now
-var competencyPackTrackerMapById = {};
-
+var profileCompetencyData;
+var profileDisplayHelperData;
+var profileD3NodeString;
 
 //**************************************************************************************************
 // Data Structures
@@ -118,11 +115,6 @@ function isOwnProfile() {
     return loggedInPkPem == profileUserPkPem;
 }
 
-function doesCompetencyHaveAssertion(compId) {
-    if (!competencyAssertionMap[compId] || competencyAssertionMap[compId] == null) return false;
-    else return true;
-}
-
 function getAssertionsForCompetency(compId) {
     return competencyAssertionMap[compId];
 }
@@ -140,24 +132,35 @@ function getAssertionsForFramework(frameworkId) {
 
 //TODO getAssertionsForD3Node fix for multi node clusters
 function getAssertionsForD3Node(d3Node) {
-    evidenceTrail.push(d3Node.data.name.trim());
-    var cpt = competencyPackTrackerMapById[d3Node.data.name.trim()];
-    var comp = cpt.cassNodePacket.getNodeList()[0];
-    var asArray = getAssertionsForCompetency(comp.getId());
+    if (d3Node && d3Node.data) evidenceTrail.push(d3Node.data.name.trim());
+    var d3nt = profileCompetencyData.competencyD3NodeTrackerMap[d3Node.data.name.trim()];
+    var asArray = getAssertionsForCompetency(d3nt.id);
     if (!asArray || asArray == null || asArray.length == 0) {
-        if (!cpt.d3Node || !cpt.d3Node.parent || cpt.d3Node.parent == null) return null;
-        else return getAssertionsForD3Node(cpt.d3Node.parent);
-    } else return asArray;
+        if (!d3nt.d3Node || !d3nt.d3Node.parent || d3nt.d3Node.parent == null) return null;
+        else return getAssertionsForD3Node(d3nt.d3Node.parent);
+    }
+    else return asArray;
 }
 
-//TODO getAssertionsForCompetencyPackTracker fix for multi node clusters
-function getAssertionsForCompetencyPackTracker(cpTracker) {
-    var comp = cpTracker.cassNodePacket.getNodeList()[0];
-    var asArray = getAssertionsForCompetency(comp.getId());
+//TODO getAssertionsForCompetencyD3NodeTracker fix for multi node clusters
+function getAssertionsForCompetencyD3NodeTracker(d3nt) {
+    var asArray = getAssertionsForCompetency(d3nt.id);
     if (!asArray || asArray == null || asArray.length == 0) {
-        if (!cpTracker.d3Node || !cpTracker.d3Node.parent || cpTracker.d3Node.parent == null) return null;
-        else return getAssertionsForD3Node(cpTracker.d3Node.parent);
-    } else return asArray;
+        if (!d3nt.d3Node || !d3nt.d3Node.parent || d3nt.d3Node.parent == null) return null;
+        else return getAssertionsForD3Node(d3nt.d3Node.parent);
+    }
+    else return asArray;
+}
+
+//TODO getAssertionsForCompetencyPacketData fix for multi node clusters
+function getAssertionsForCompetencyPacketData(cpd) {
+    var asArray = getAssertionsForCompetency(cpd.id);
+    if (!asArray || asArray == null || asArray.length == 0) {
+        var d3nt = profileCompetencyData.competencyD3NodeTrackerMap[cpd.id];
+        if (!d3nt || !d3nt.d3Node || !d3nt.d3Node.parent || d3nt.d3Node.parent == null) return null;
+        else return getAssertionsForD3Node(d3nt.d3Node.parent);
+    }
+    else return asArray;
 }
 
 function getEvidenceForAssertion(as) {
@@ -169,6 +172,13 @@ function getEvidenceForAssertion(as) {
         }
     }
     return evArray;
+}
+
+function isFrameworkIdOrProfileUser(id) {
+    if (id == profileUserName) return true;
+    var x = applicableFrameworkMap[id];
+    if (x) return true;
+    else return false;
 }
 
 function getFrameworkName(frameworkId) {
@@ -198,15 +208,15 @@ function getFrameworksForCompetency(competencyId) {
     return retArray;
 }
 
-function getCompetencyOrFrameworkName(competencyId) {
-    //yes...this first if is weird...but it is an easy solution to a problem
-    // specifically if trying to get the competency name for a D3 circle ID and that D3 circle is the
-    // outer framework circle...
-    if (competencyId == profileUserName) return profileUserName;
-    var cpt = competencyPackTrackerMapById[competencyId];
-    if (!cpt || cpt == null) return "N/A";
-    else if (cpt.isFramework) return getFrameworkName(competencyId);
-    else return generateNameFromCassNodePacket(cpt.cassNodePacket);
+function getCompetencyOrFrameworkName(cfId) {
+    if (cfId == profileUserName) return profileUserName;
+    if (cfId == profileUserName) return profileUserName;
+    else if (isFrameworkIdOrProfileUser(cfId)) return getFrameworkName(cfId);
+    else {
+        var d3ft = profileCompetencyData.competencyD3NodeTrackerMap[cfId];
+        if (!d3ft || d3ft == null) return "N/A";
+        else return generateNameFromCassNodePacket(profileCompetencyData.competencyPacketDataMap[cfId].cassNodePacket);
+    }
 }
 
 function buildCassEditorFrameworkHyperlinkListForCompetency(competencyId) {
@@ -354,28 +364,28 @@ function buildHashStringFromStringArray(strArray) {
 }
 
 function checkForProfileUserSearchbarEnter(event) {
-    // if (event.which == 13 || event.keyCode == 13) {
-    //     $(PROF_USR_SRCH_INPT).autocomplete("close");
-    //     setUpAndFetchAssertionsForSelectedUser($(PROF_USR_SRCH_INPT).val().trim());
-    // }
+    if (event.which == 13 || event.keyCode == 13) {
+        $(PROF_USR_SRCH_INPT).autocomplete("close");
+        setUpAndFetchAssertionsForSelectedUser($(PROF_USR_SRCH_INPT).val().trim());
+    }
 }
 
 function checkForProfileSearchbarEnter(event) {
-    // if (event.which == 13 || event.keyCode == 13) {
-    //     $(PROF_SRCH_INPT).autocomplete("close");
-    //     findItemByProfileSearchBar($(PROF_SRCH_INPT).val().trim());
-    // }
+    if (event.which == 13 || event.keyCode == 13) {
+        $(PROF_SRCH_INPT).autocomplete("close");
+        findItemByProfileSearchBar($(PROF_SRCH_INPT).val().trim());
+    }
 }
 
 function setProfileUserAsLoggedInUserAndGo() {
-    // hideProfileUserSearchContainer();
-    // setUpProfileUserAndFetchAssertions(loggedInIdentityName, loggedInPkPem);
+    hideProfileUserSearchContainer();
+    setUpProfileUserAndFetchAssertions(loggedInIdentityName, loggedInPkPem);
 }
 
 function setUpForProfileUserSearch() {
-    // fillInProfileUserSearchAutoComplete();
-    // showOnlyProfileExplorerMainMenu();
-    // showProfileUserSearchContainer();
+    fillInProfileUserSearchAutoComplete();
+    hideProfileExpTools();
+    showProfileUserSearchContainer();
 }
 
 function openFrameworkInFrameworkExplorer(frameworkId) {
@@ -385,9 +395,53 @@ function openFrameworkInFrameworkExplorer(frameworkId) {
     // //alert("OPEN FRAMEWORK: " + frameworkId);
 }
 
-//**************************************************************************************************
-// Explorer Circle Graph Supporting Functions
-//**************************************************************************************************
+function showCompetencyDetailsModal(compId) {
+    // var cpt = competencyPackTrackerMapById[compId];
+    // if (!cpt) return;
+    // var comp = cpt.cassNodePacket.getNodeList()[0];
+    // if (!comp) return;
+    // $(COMP_DTL_NAME).html(comp.getName().trim());
+    // $(COMP_DTL_DESC).html(comp.getDescription().trim());
+    // //$(COMP_DTL_FRM_NAME).html(buildCassEditorFrameworkHyperlinkListForCompetency(comp.id));
+    // $(COMP_DTL_FRM_NAME).html(buildFrameworkExplorerFrameworkHyperlinkListForCompetency(comp.id));
+    // var asArray = getAssertionsForCompetencyPackTracker(cpt);
+    // var conf = determineConfidenceForAssertions(asArray);
+    // $(COMP_DTL_CONF).html((conf * 100) + "%");
+    // buildAssertionListForCompetencyDetailsModal(asArray);
+    // $(COMP_DTL_MODAL).foundation('open');
+}
+
+function showAssertionDetailsModal(assertionId) {
+    // var as = assertionMap[assertionId];
+    // $(ASR_DTL_SOURCE).html(assertionSourceMap[assertionId]);
+    // $(ASR_DTL_SUBJECT).html(profileUserName);
+    // var compName = getCompetencyOrFrameworkName(as.competency);
+    // $(ASR_DTL_COMP).html(buildHyperlinkListForCompetency(as.competency));
+    // //$(ASR_DTL_FW_CTR).html(buildCassEditorFrameworkHyperlinkListForCompetency(as.competency));
+    // $(ASR_DTL_FW_CTR).html(buildFrameworkExplorerFrameworkHyperlinkListForCompetency(as.competency));
+    // buildAssertionDetailsLevel(as.level);
+    // buildAssertionDetailsHolds(assertionNegativeMap[assertionId]);
+    // $(ASR_DTL_CONF).html((as.confidence * 100) + "%");
+    // $(ASR_DTL_DATE).html(toDateString(new Date(as.getAssertionDate())));
+    // $(ASR_DTL_EXP).html(toDateString(new Date(as.getExpirationDate())));
+    // $(ASR_DTL_URL).html(generateAnchorLink(as.shortId(), "JSON", compName + " Assertion"));
+    // buildAssertionDetailsEvidenceList(as.shortId(), getEvidenceForAssertion(as));
+    // $(ASR_DTL_MODAL).foundation('open');
+}
+
+function showEvidenceDetailsModal(assertionId, evIdx) {
+    // if (!assertionEvidenceMap[assertionId] || !assertionEvidenceMap[assertionId][evIdx]) return;
+    // var ev = assertionEvidenceMap[assertionId][evIdx];
+    // $(EV_DTL_NAME).html(ev.name);
+    // $(EV_DTL_TYPE).html(ev.type);
+    // $(EV_DTL_SOURCE).html(ev.source);
+    // // $(EV_DTL_DATE).html(toDateString(new Date(ev.evDate)));
+    // // $(EV_DTL_EXP).html(toDateString(new Date(ev.expDate)));
+    // $(EV_DTL_URL).html(generateAnchorLink(ev.link, "Evidence", ev.name + " - Evidence Link"));
+    // $(EV_DTL_ASR_ID).html(generateEvidenceDetailsAssertionLinks(ev));
+    // buildEvidenceDetailsPreview(ev);
+    // $(EV_DTL_MODAL).foundation('open');
+}
 
 //**************************************************************************************************
 // Validate Assertions Modal
@@ -405,16 +459,1198 @@ function openProfileExpAssertionValidateModal() {
 }
 
 //**************************************************************************************************
+// Assertion Envelopes/Grouping/Portfolio
+//**************************************************************************************************
+function showAssertionEnvelopesInListView() {
+    alert("TODO showAssertionEnvelopesInListView");
+}
+
+function assertionIsPartOfEnvelope(assertionShortId,assertionEnvelopeId) {
+    var asrList = assertionEnvelopeAssertionMap[assertionEnvelopeId];
+    if (!asrList || asrList == null || asrList.length == 0) return false;
+    for (var i=0;i<asrList.length;i++) {
+        if (asrList[i].shortId() == assertionShortId) return true;
+    }
+    return false;
+}
+
+function contactIsAssignedToAssertionShareEnvelopeAssignmentTracker(contactPkPem,assertionEnvelopeId) {
+    var aeat = assertionShareEnvelopeAssignmentTracker[assertionEnvelopeId];
+    if (!aeat["newContacts"] || aeat["newContacts"].length <= 0) return false;
+    for (var i=0;i<aeat["newContacts"].length;i++) {
+        if (aeat["newContacts"][i] == contactPkPem) return true;
+    }
+    return false;
+}
+
+function contactIsAssignedToNewAssertionShareEnvelope(contactPkPem,naseIdx) {
+    var nase = newAssertionShareEnvelopeList[naseIdx];
+    if (!nase.contacts || nase.contacts.length <= 0) return false;
+    for (var i=0;i<nase.contacts.length;i++) {
+        if (nase.contacts[i] == contactPkPem) return true;
+    }
+    return false;
+}
+
+function generateAssertionDescriptionHtml(assertionShortId) {
+    var asr = assertionMap[assertionShortId];
+    if (!asr || asr == null) return "";
+    var desc = "";
+    desc += "<strong>" + assertionSourceMap[assertionShortId] + "</strong>";
+    desc += "<i> claims subject ";
+    var isNegativeAssertion = assertionNegativeMap[assertionShortId];
+    if (isNegativeAssertion) desc += "does not hold ";
+    else desc += "holds ";
+    desc += " </i>";
+    desc += "<strong>" + getCompetencyOrFrameworkName(asr.competency) + "</strong>";
+    return desc;
+}
+
+function generateAssertionDescriptionSimpleHtml(assertionShortId) {
+    var asr = assertionMap[assertionShortId];
+    if (!asr || asr == null) return "";
+    var desc = "";
+    desc += assertionSourceMap[assertionShortId];
+    desc += " claims subject ";
+    var isNegativeAssertion = assertionNegativeMap[assertionShortId];
+    if (isNegativeAssertion) desc += "does not hold ";
+    else desc += "holds ";
+    desc += getCompetencyOrFrameworkName(asr.competency);
+    return desc;
+}
+
+function assertionShareCancelCreatePortfolio() {
+    $(ASR_SHARE_ERROR_CTR).hide();
+    $(ASR_SHARE_BUSY_CTR).hide();
+    if (assertionEnvelopeList.length == 0 && newAssertionShareEnvelopeList.length == 0) {
+        $(ASR_SHARE_MODAL).foundation('close');
+    }
+    else {
+        $(ASR_SHARE_CREATE_PRTF_CTR).hide();
+        $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
+    }
+}
+
+function buildEnvelopeContactsIconForAssertionShare(aesi,naseIdx) {
+    var aesiParm;
+    if (!aesi || aesi == null) aesiParm = "null";
+    else aesiParm = "'" + aesi + "'";
+    var naseIdxParm;
+    if (naseIdx == 0) naseIdxParm = 0;
+    else if (!naseIdx || naseIdx == null) naseIdxParm = "null";
+    else naseIdxParm = naseIdx;
+    var ciHtml = "<a  title=\"Manage portfolio contacts\" onclick=\"managePortfolioContactsForAssertionShare(" + aesiParm + "," + naseIdxParm + ");\" ";
+    ciHtml += "class=\"portfolioContentsIcon\"><i class=\"fa fa-users\"></i></a>";
+    return ciHtml;
+}
+
+function buildPortfolioContentsDivIdForAssertionShare(aesi) {
+    return ASR_SHARE_PRTF_CONTENS_CTR_ID_PREFIX + buildIDableString(aesi);
+}
+
+function buildEnvelopeAssertionContentsDivForAssertionShare(aesi) {
+    if (!aesi || aesi == null) return null;
+    if (!assertionEnvelopeAssertionMap[aesi] || assertionEnvelopeAssertionMap[aesi] == null) return null;
+    var ecaList = assertionEnvelopeAssertionMap[aesi];
+    if (!ecaList || ecaList == null || ecaList.length == 0)  return null;
+    var asrDiv =  $("<div/>");
+    asrDiv.attr("style","display:none");
+    asrDiv.attr("class","portfolioAssertionContents");
+    var asrDivId = buildPortfolioContentsDivIdForAssertionShare(aesi);
+    asrDiv.attr("id",asrDivId);
+    var asrUl = $("<ul/>");
+    for (var i=0;i<ecaList.length;i++) {
+        var asrLi = $("<li/>");
+        var asrLiHtml = generateAssertionDescriptionHtml(ecaList[i].shortId());
+        asrLi.html(asrLiHtml);
+        asrUl.append(asrLi);
+    }
+    asrDiv.append(asrUl);
+    return asrDiv;
+}
+
+function buildEnvelopeAssertionContentsIconForAssertionShare(aesi) {
+    if (!aesi || aesi == null) return "&nbsp;";
+    if (!assertionEnvelopeAssertionMap[aesi] || assertionEnvelopeAssertionMap[aesi] == null) return "&nbsp;";
+    var ecaList = assertionEnvelopeAssertionMap[aesi];
+    if (!ecaList || ecaList == null || ecaList.length == 0)  return "&nbsp;";
+    var asrDivId = buildPortfolioContentsDivIdForAssertionShare(aesi);
+    var acHtml = "<a onclick=\"$('#" + asrDivId + "').toggle();\"";
+    acHtml += " class=\"portfolioContentsIcon\" title=\"";
+    acHtml += "Portfolio Contents:&#10;";
+    for (var i=0;i<ecaList.length;i++) {
+        acHtml += "   -" + generateAssertionDescriptionSimpleHtml(ecaList[i].shortId()) + "&#10;";
+    }
+    acHtml += "\"><i class=\"fa fa-info-circle\"></i></a>";
+    return acHtml;
+}
+
+function buildAssertionSharePortfolioListLineItem(prtName,checkBoxId,checked,aesi,naseIdx) {
+    var glLi = $("<li/>");
+    var glLiHtml = "<div class=\"grid-x\">";
+    glLiHtml += "<div class=\"cell small-10\">";
+    glLiHtml += "<input id=\"" + checkBoxId + "\" type=\"checkbox\"";
+    if (checked) glLiHtml += " checked ";
+    glLiHtml += "></input>";
+    glLiHtml += "<label for=\"" + checkBoxId + "\">" + prtName + "</label>";
+    glLiHtml += "</div>";
+    glLiHtml += "<div class=\"cell small-1\">";
+    glLiHtml += buildEnvelopeAssertionContentsIconForAssertionShare(aesi);
+    glLiHtml += "</div>";
+    glLiHtml += "<div class=\"cell small-1\">";
+    glLiHtml += buildEnvelopeContactsIconForAssertionShare(aesi,naseIdx);
+    glLiHtml += "</div>";
+    glLiHtml += "</div>";
+    glLi.html(glLiHtml);
+    var asrDiv = buildEnvelopeAssertionContentsDivForAssertionShare(aesi);
+    if (asrDiv && asrDiv != null) glLi.append(asrDiv);
+    return glLi;
+}
+
+function addAssertionEnvelopesToAssertionSharePortfolioList() {
+    for (var aesi in assertionShareEnvelopeAssignmentTracker) {
+        if (assertionShareEnvelopeAssignmentTracker.hasOwnProperty(aesi)) {
+            var prtName = assertionShareEnvelopeAssignmentTracker[aesi]["name"];
+            var checkBoxId = buildIDableString(ASR_SHARE_EX_AE_CB_ID_PREFIX + aesi);
+            var checked = assertionShareEnvelopeAssignmentTracker[aesi]["newAssigned"];
+            $(ASR_SHARE_ASSIGN_PRTF_LIST).append(buildAssertionSharePortfolioListLineItem(prtName,checkBoxId,checked,aesi,null));
+        }
+    }
+}
+
+function addNewAssertionShareEnvelopeListToAssertionSharePortfolioList() {
+    for (var i=0;i<newAssertionShareEnvelopeList.length;i++) {
+        var prtName = newAssertionShareEnvelopeList[i].name;
+        var checkBoxId = ASR_SHARE_NEW_AE_CB_ID_PREFIX + i;
+        var checked = newAssertionShareEnvelopeList[i].assigned;
+        $(ASR_SHARE_ASSIGN_PRTF_LIST).append(buildAssertionSharePortfolioListLineItem(prtName,checkBoxId,checked,null,i));
+    }
+}
+
+function buildAssertionSharePortfolioList() {
+    $(ASR_SHARE_ASSIGN_PRTF_LIST).empty();
+    addAssertionEnvelopesToAssertionSharePortfolioList();
+    addNewAssertionShareEnvelopeListToAssertionSharePortfolioList();
+}
+
+function initAssertionShareEnvelopeTracker(assertionShortId) {
+    assertionShareEnvelopeAssignmentTracker = {};
+    for (var i=0;i<assertionEnvelopeList.length;i++) {
+        var aeShortId = assertionEnvelopeList[i].shortId();
+        var isAssigned = assertionIsPartOfEnvelope(assertionShortId,aeShortId);
+        assertionShareEnvelopeAssignmentTracker[aeShortId] = {};
+        assertionShareEnvelopeAssignmentTracker[aeShortId]["name"] = assertionEnvelopeList[i].name;
+        assertionShareEnvelopeAssignmentTracker[aeShortId]["initialAssigned"] = isAssigned;
+        assertionShareEnvelopeAssignmentTracker[aeShortId]["newAssigned"] = isAssigned;
+        assertionShareEnvelopeAssignmentTracker[aeShortId]["initialContacts"] = assertionEnvelopeList[i].reader;
+        assertionShareEnvelopeAssignmentTracker[aeShortId]["newContacts"] = assertionEnvelopeList[i].reader;
+    }
+}
+
+function showAssertionShareAsBusy(busyMsg) {
+    $(ASR_SHARE_ERROR_CTR).hide();
+    $(ASR_SHARE_BYS_TEXT).html(busyMsg);
+    $(ASR_SHARE_BUSY_CTR).show();
+}
+
+function showAssertionShareError(errMsg) {
+    $(ASR_SHARE_BUSY_CTR).hide();
+    $(ASR_SHARE_ERROR_TEXT).html(errMsg);
+    $(ASR_SHARE_ERROR_CTR).show();
+}
+
+function assertionShareNewPortfolio() {
+    $(ASR_SHARE_CREATE_PRTF_NAME).val("");
+    $(ASR_SHARE_ASSIGN_PRTF_CTR).hide();
+    $(ASR_SHARE_CREATE_PRTF_CTR).show();
+}
+
+function assertionSharePortfolioAlreadyExists(candidateName) {
+    var prtName;
+    for (var aesi in assertionShareEnvelopeAssignmentTracker) {
+        if (assertionShareEnvelopeAssignmentTracker.hasOwnProperty(aesi)) {
+            prtName = assertionShareEnvelopeAssignmentTracker[aesi]["name"];
+            if (prtName.toLowerCase() == candidateName.toLowerCase()) return true;
+        }
+    }
+    for (var i=0;i<newAssertionShareEnvelopeList.length;i++) {
+        prtName = newAssertionShareEnvelopeList[i].name;
+        if (prtName.toLowerCase() == candidateName.toLowerCase()) return true;
+    }
+    return false;
+}
+
+function isAssertionShareCreatePortfolioInputValid() {
+    var newPrtName = $(ASR_SHARE_CREATE_PRTF_NAME).val().trim();
+    if (!newPrtName || newPrtName == "") {
+        showAssertionShareError("Portfolio name is required");
+        return false;
+    }
+    else if (assertionSharePortfolioAlreadyExists(newPrtName)) {
+        showAssertionShareError("Portfolio already exists");
+        return false;
+    }
+    return true;
+}
+
+function assertionShareCreatePortfolio() {
+    if (isAssertionShareCreatePortfolioInputValid()) {
+        var newPrtName = $(ASR_SHARE_CREATE_PRTF_NAME).val().trim("");
+        var nase = new newAssertionShareEnvelope(newPrtName);
+        newAssertionShareEnvelopeList.push(nase);
+        var newIdx = newAssertionShareEnvelopeList.length - 1;
+        var checkBoxId = ASR_SHARE_NEW_AE_CB_ID_PREFIX + newIdx;
+        var checked = nase.assigned;
+        $(ASR_SHARE_ASSIGN_PRTF_LIST).append(buildAssertionSharePortfolioListLineItem(newPrtName, checkBoxId, checked,null,newIdx));
+        $(ASR_SHARE_ERROR_CTR).hide();
+        $(ASR_SHARE_CREATE_PRTF_CTR).hide();
+        $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
+    }
+}
+
+function getNumberOfAssertionEnvelopesToSave() {
+    var numToSave = 0;
+    for (var property in assertionEnvelopeListToSave) {
+        if (assertionEnvelopeListToSave.hasOwnProperty(property)) {
+            numToSave++;
+        }
+    }
+    return numToSave;
+}
+
+function handleSynchAssertionEnvelopesFromAssertionShareFailure(failMsg) {
+    displayAppError("rebuildAssertionEnvelopeDataFromAssertionShareFailure: " + failMsg);
+    showProfileDisplayAsError("rebuildAssertionEnvelopeDataFromAssertionShareFailure: " + failMsg);
+    $(ASR_SHARE_BUSY_CTR).hide();
+    $(ASR_SHARE_MODAL).foundation('close');
+}
+
+function handleSynchAssertionEnvelopesFromAssertionShareSuccess(ecRldArray) {
+    debugMessage("rebuildAssertionEnvelopeDataFromAssertionShareSuccess: " + ecRldArray.length);
+    if (ecRldArray && ecRldArray != null) {
+        for (var i=0;i<ecRldArray.length;i++) {
+            processPotentialAssertionEnvelope(ecRldArray[i]);
+        }
+    }
+    if (assertionEnvelopeList.length > 1) {
+        assertionEnvelopeList.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
+    }
+    $(ASR_SHARE_BUSY_CTR).hide();
+    $(ASR_SHARE_MODAL).foundation('close');
+}
+
+function synchAssertionEnvelopesFromAssertionShare() {
+    showAssertionShareAsBusy("Synching portfolios...");
+    assertionEnvelopeList = [];
+    assertionEnvelopeMap = {};
+    assertionAssertionEnvelopeMap = {};
+    assertionEnvelopeAssertionMap = {};
+    repo.search(new AssertionEnvelope().getSearchStringByType(),null,handleSynchAssertionEnvelopesFromAssertionShareSuccess,handleSynchAssertionEnvelopesFromAssertionShareFailure);
+}
+
+function checkAssertionEnvelopeSaveFromAssertionShareComplete() {
+    if (numberOfAssertionEnvelopesSaved >= numberOfAssertionEnvelopesToSave) {
+        synchAssertionEnvelopesFromAssertionShare();
+    }
+}
+
+function handleSaveAssertionEnvelopeFromAssertionShareSuccess(msg) {
+    debugMessage("handleSaveAssertionEnvelopeFromAssertionShareSuccess: " + msg);
+    numberOfAssertionEnvelopesSaved++;
+    checkAssertionEnvelopeSaveFromAssertionShareComplete();
+}
+
+function handleSaveAssertionEnvelopeFromAssertionShareFailure(failMsg) {
+    debugMessage("!!!!!!!!!!handleSaveAssertionEnvelopeFromAssertionShareFailure: " + failMsg);
+    numberOfAssertionEnvelopesSaved++;
+    checkAssertionEnvelopeSaveFromAssertionShareComplete();
+}
+
+function saveAssertionEnvelopeFromAssertionShare(ae) {
+    debugMessage("saveAssertionEnvelopeFromAssertionShare: " + ae.shortId());
+    var aeEv = EcEncryptedValue.toEncryptedValue(ae,false);
+    EcRepository.save(aeEv,handleSaveAssertionEnvelopeFromAssertionShareSuccess,handleSaveAssertionEnvelopeFromAssertionShareFailure);
+}
+
+function saveModifiedAssertionEnvelopesFromAssertionShare() {
+    numberOfAssertionEnvelopesToSave = getNumberOfAssertionEnvelopesToSave();
+    numberOfAssertionEnvelopesSaved = 0;
+    for (var aesi in assertionEnvelopeListToSave) {
+        if (assertionEnvelopeListToSave.hasOwnProperty(aesi)) {
+            saveAssertionEnvelopeFromAssertionShare(assertionEnvelopeListToSave[aesi]);
+        }
+    }
+}
+
+function addAssertionToAssertionEnvelope(assertionShortId,assertionEnvelopeId) {
+    var ae = assertionEnvelopeMap[assertionEnvelopeId];
+    if (ae && ae != null) {
+        var asr = assertionMap[currentAssertionShareId];
+        if (asr && asr != null) {
+            ae.addAssertion(asr);
+            assertionEnvelopeListToSave[assertionEnvelopeId] = ae;
+        }
+    }
+}
+
+function removeAssertionFromAssertionEnvelope(assertionShortId,assertionEnvelopeId) {
+    var ae = assertionEnvelopeMap[assertionEnvelopeId];
+    if (ae && ae != null) {
+        ae.removeAssertionByShortId(assertionShortId);
+        assertionEnvelopeListToSave[assertionEnvelopeId] = ae;
+    }
+}
+
+function assertionShareCancelPortfolioContactsAssignment() {
+    $(ASR_SHARE_ERROR_CTR).hide();
+    $(ASR_SHARE_BUSY_CTR).hide();
+    $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
+    $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
+}
+
+function assertionShareApplyPortfolioContactsForAesi(aesi) {
+    var aeat = assertionShareEnvelopeAssignmentTracker[aesi];
+    if (!aeat || aeat == null) return;
+    aeat["newContacts"] = [];
+    for (var i=0;i<contactDisplayList.length;i++) {
+        var cdo = contactDisplayList[i];
+        if (cdo.pkPem != loggedInPkPem && !cdo.hide){
+            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(cdo.pkPem);
+            var isAssigned = $("#" + checkBoxId).prop("checked");
+            if (isAssigned) aeat["newContacts"].push(cdo.pkPem);
+        }
+    }
+}
+
+function assertionShareApplyPortfolioContactsForNaseIdx(naseIdx) {
+    var nase = newAssertionShareEnvelopeList[naseIdx];
+    if (!nase || nase == null) return;
+    nase.contacts = [];
+    for (var i=0;i<contactDisplayList.length;i++) {
+        var cdo = contactDisplayList[i];
+        if (cdo.pkPem != loggedInPkPem && !cdo.hide){
+            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(cdo.pkPem);
+            var isAssigned = $("#" + checkBoxId).prop("checked");
+            if (isAssigned) nase.contacts.push(cdo.pkPem);
+        }
+    }
+}
+
+function assertionShareApplyPortfolioContacts() {
+    var prtType = $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE).val();
+    if ("aesi" == prtType) {
+        var aesi = $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val();
+        assertionShareApplyPortfolioContactsForAesi(aesi);
+    }
+    else {
+        var naseIdx = $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val();
+        assertionShareApplyPortfolioContactsForNaseIdx(naseIdx);
+    }
+    $(ASR_SHARE_ERROR_CTR).hide();
+    $(ASR_SHARE_BUSY_CTR).hide();
+    $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
+    $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
+}
+
+function buildAssertionShareContactAssignmentLineItem(cntName,checkBoxId,checked) {
+    var cntLi = $("<li/>");
+    var cntLiHtml = "<input id=\"" + checkBoxId + "\" type=\"checkbox\"";
+    if (checked) cntLiHtml += " checked ";
+    cntLiHtml += "></input>";
+    cntLiHtml += "<label for=\"" + checkBoxId + "\">" + cntName + "</label>";
+    cntLi.html(cntLiHtml);
+    return cntLi;
+}
+
+function buildContactListForMangePortfolioContactsAssertionShare(aesi,naseIdx) {
+    $(ASR_SHARE_PRTF_CONTACTS_LIST).empty();
+    for (var i=0;i<contactDisplayList.length;i++) {
+        var cdo = contactDisplayList[i];
+        if (cdo.pkPem != loggedInPkPem && !cdo.hide){
+            var cntName = cdo.displayName;
+            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(cdo.pkPem);
+            var checked = false;
+            if (aesi && aesi != null) checked = contactIsAssignedToAssertionShareEnvelopeAssignmentTracker(cdo.pkPem,aesi);
+            else checked = contactIsAssignedToNewAssertionShareEnvelope(cdo.pkPem,naseIdx);
+            var cntLi = buildAssertionShareContactAssignmentLineItem(cntName,checkBoxId,checked);
+            $(ASR_SHARE_PRTF_CONTACTS_LIST).append(cntLi);
+        }
+    }
+}
+
+function addPortfolioNameForMangePortfolioContactsAssertionShare(aesi,naseIdx) {
+    var prtfName = "UNKNOWN";
+    if (aesi && aesi != null) {
+        prtfName = assertionEnvelopeMap[aesi].name;
+        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE).val("aesi");
+        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val(aesi);
+    }
+    else {
+        prtfName = newAssertionShareEnvelopeList[naseIdx].name;
+        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE).val("naseIdx");
+        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val(naseIdx);
+    }
+    $(ASR_SHARE_PRTF_CONTACTS_PRTF_NAME).html(prtfName);
+}
+
+function managePortfolioContactsForAssertionShare(aesi,naseIdx) {
+    if ((!aesi || aesi == null) && (!naseIdx && naseIdx == null)) return;
+    addPortfolioNameForMangePortfolioContactsAssertionShare(aesi,naseIdx);
+    buildContactListForMangePortfolioContactsAssertionShare(aesi,naseIdx);
+    $(ASR_SHARE_ERROR_CTR).hide();
+    $(ASR_SHARE_BUSY_CTR).hide();
+    $(ASR_SHARE_ASSIGN_PRTF_CTR).hide();
+    $(ASR_SHARE_PRTF_CONTACTS_CTR).show();
+}
+
+function removeAllAssertionEnvelopeReaders(ae) {
+    if (!ae.reader || ae.reader == null || ae.reader.length == 0) return;
+    var pksToRemove = [];
+    for (var i=0;i<ae.reader.length;i++) {
+        var pk = contactsByPkPemMap[ae.reader[i]].pk;
+        if (pk && pk != null) {
+            pksToRemove.push(pk);
+        }
+    }
+    for (var i=0;i<pksToRemove.length;i++) {
+        ae.removeReader(pksToRemove[i]);
+    }
+}
+
+function synchAssertionEnvelopeReadersFromTracker(assertionEnvelopeId) {
+    var ae = assertionEnvelopeMap[assertionEnvelopeId];
+    if (ae && ae != null) {
+        var aeat = assertionShareEnvelopeAssignmentTracker[assertionEnvelopeId];
+        removeAllAssertionEnvelopeReaders(ae);
+        for (var i=0;i<aeat["newContacts"].length;i++) {
+            var pk = contactsByPkPemMap[aeat["newContacts"][i]].pk;
+            ae.addReader(pk);
+        }
+        assertionEnvelopeListToSave[assertionEnvelopeId] = ae;
+    }
+}
+
+function saveChangedExistingEnvelopesForAssertionShare() {
+    for (var aesi in assertionShareEnvelopeAssignmentTracker) {
+        if (assertionShareEnvelopeAssignmentTracker.hasOwnProperty(aesi)) {
+            var initialAssigned = assertionShareEnvelopeAssignmentTracker[aesi]["initialAssigned"];
+            var newAssigned = assertionShareEnvelopeAssignmentTracker[aesi]["newAssigned"];
+            if (initialAssigned != newAssigned) {
+                if (newAssigned) addAssertionToAssertionEnvelope(currentAssertionShareId,aesi);
+                else if (!newAssigned) removeAssertionFromAssertionEnvelope(currentAssertionShareId,aesi);
+            }
+            var initialContactsHash = buildHashStringFromStringArray(assertionShareEnvelopeAssignmentTracker[aesi]["initialContacts"]);
+            var newContactsHash = buildHashStringFromStringArray(assertionShareEnvelopeAssignmentTracker[aesi]["newContacts"]);
+            if (initialContactsHash != newContactsHash) {
+                synchAssertionEnvelopeReadersFromTracker(aesi);
+            }
+        }
+    }
+}
+
+function addAssertionReadersFromNewAssertionShareEnvelopContacts(ae,nase) {
+    for (var j=0;j<nase.contacts.length;j++) {
+        var ct = contactsByPkPemMap[nase.contacts[j]];
+        ae.addReader(ct.pk);
+    }
+}
+
+//TODO createNewEnvelopesForAssertionShare add all ids as owners
+function createNewEnvelopesForAssertionShare() {
+    for (var i=0;i<newAssertionShareEnvelopeList.length;i++) {
+        if (newAssertionShareEnvelopeList[i].assigned) {
+            var asr = assertionMap[currentAssertionShareId];
+            if (asr && asr != null) {
+                var nase = newAssertionShareEnvelopeList[i];
+                var newAe = new AssertionEnvelope();
+                newAe.name = nase.name;
+                newAe.addAssertion(asr);
+                newAe.addOwner(EcIdentityManager.ids[0].ppk.toPk());
+                addAssertionReadersFromNewAssertionShareEnvelopContacts(newAe,nase);
+                newAe.generateId(repo.selectedServer);
+                assertionEnvelopeListToSave[newAe.shortId()] = newAe;
+            }
+        }
+    }
+}
+
+function saveEnvelopesForAssertionShare() {
+    assertionEnvelopeListToSave = {};
+    saveChangedExistingEnvelopesForAssertionShare();
+    createNewEnvelopesForAssertionShare();
+    if (getNumberOfAssertionEnvelopesToSave() > 0) saveModifiedAssertionEnvelopesFromAssertionShare();
+    else {
+        $(ASR_SHARE_BUSY_CTR).hide();
+        $(ASR_SHARE_MODAL).foundation('close');
+    }
+}
+
+function updateNewEnvelopeAssignmentsForAssertionShare() {
+    for (var i=0;i<newAssertionShareEnvelopeList.length;i++) {
+        var checkBoxId = ASR_SHARE_NEW_AE_CB_ID_PREFIX + i
+        var isAssigned = $("#" + checkBoxId).prop("checked");
+        newAssertionShareEnvelopeList[i].assigned  = isAssigned;
+    }
+}
+
+function updateExistingEnvelopeAssignmentsForAssertionShare() {
+    for (var aesi in assertionShareEnvelopeAssignmentTracker) {
+        if (assertionShareEnvelopeAssignmentTracker.hasOwnProperty(aesi)) {
+            var checkBoxId = buildIDableString(ASR_SHARE_EX_AE_CB_ID_PREFIX + aesi);
+            var isAssigned = $("#" + checkBoxId).prop("checked");
+            assertionShareEnvelopeAssignmentTracker[aesi]["newAssigned"] = isAssigned;
+        }
+    }
+}
+
+function assertionShareSave() {
+    showAssertionShareAsBusy("Saving portfolios...");
+    updateExistingEnvelopeAssignmentsForAssertionShare();
+    updateNewEnvelopeAssignmentsForAssertionShare();
+    saveEnvelopesForAssertionShare();
+}
+
+function shareAssertion(assertionShortId) {
+    $(ASR_SHARE_ERROR_CTR).hide();
+    $(ASR_SHARE_BUSY_CTR).hide();
+    $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
+    $(ASR_SHARE_CREATE_PRTF_NAME).val("");
+    newAssertionShareEnvelopeList = [];
+    currentAssertionShareId = assertionShortId;
+    $(ASR_SHARE_ASR_DESC).html(generateAssertionDescriptionHtml(assertionShortId));
+    initAssertionShareEnvelopeTracker(assertionShortId);
+    if (assertionEnvelopeList.length == 0) {
+        $(ASR_SHARE_ASSIGN_PRTF_CTR).hide();
+        $(ASR_SHARE_CREATE_PRTF_CTR).show();
+    }
+    else {
+        buildAssertionSharePortfolioList();
+        $(ASR_SHARE_CREATE_PRTF_CTR).hide();
+        $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
+    }
+    $(ASR_SHARE_MODAL).foundation('open');
+}
+
+//**************************************************************************************************
+// Credential View Manipulation
+//**************************************************************************************************
+
+function buildDegreeCertView() {
+    $(degreeCertList).each(function (i, dc) {
+        var dcIconDiv = $("<div/>");
+        dcIconDiv.attr("class", "cell small-2 medium-1");
+        var dcIconHtml = "<div class=\"cass-badge\"><img src=\"img/icon-degree.png\">";
+        dcIconHtml += "<span>" + dc.type + "</span></div>";
+        dcIconDiv.html(dcIconHtml);
+        var dcDetailsDiv = $("<div/>");
+        dcDetailsDiv.attr("class", "cell small-10 medium-11");
+        var dcDetailsHtml = "<h4><a onclick=\"showEvidenceDetailsModal('" + dc.assertionId + "','" + dc.evIdx + "')\">" + dc.name + "</a></h4>";
+        dcDetailsHtml += "<span>" + dc.source + "</span>";
+        dcDetailsDiv.html(dcDetailsHtml);
+        $(COMP_CRED_DEG_CERT_CTR).append(dcIconDiv);
+        $(COMP_CRED_DEG_CERT_CTR).append(dcDetailsDiv);
+    });
+}
+
+function buildBadgeView() {
+    $(badgeList).each(function (i, bdg) {
+        var badgeDiv = $("<div/>");
+        badgeDiv.attr("class", "cell");
+        var bdHtml = "<a onclick=\"showEvidenceDetailsModal('" + bdg.assertionId + "','" + bdg.evIdx + "')\">";
+        bdHtml += "<div class=\"cass-badge\"><img src=\"" + bdg.link + "\">";
+        bdHtml += "<span>" + bdg.name + "</span></div></a>";
+        badgeDiv.html(bdHtml);
+        $(COMP_CRED_BADGE_CTR).append(badgeDiv);
+    });
+}
+
+function buildCredentialView() {
+    $(COMP_CRED_BADGE_CTR).empty();
+    $(COMP_CRED_DEG_CERT_CTR).empty();
+    if (badgeList.length == 0 && degreeCertList.length == 0) $(COMP_CRED_CTR).hide();
+    else {
+        buildBadgeView();
+        buildDegreeCertView();
+        $(COMP_CRED_CTR).show();
+    }
+}
+
+//**************************************************************************************************
+// List View
+//**************************************************************************************************
+
+function expandListViewToObject(expObj) {
+    if (expObj.hasClass("collapsed") || expObj.hasClass("expanded")) {
+        expObj.removeClass('collapsed').addClass('expanded');
+        expObj.children('.title').children('.fa-li').removeClass('fa-caret-right').addClass('fa-caret-down');
+        if (expObj.parent("ul") && expObj.parent("ul").hasClass("fa-ul")) {
+            expObj.parent("ul").attr('style', 'display:block');
+        }
+        if (expObj.parent("ul").parent("li")) {
+            expandListViewToObject(expObj.parent("ul").parent("li"));
+        }
+    }
+}
+
+//TODO expandListViewToName think of something better than name
+function expandListViewToName(name) {
+    var obj = $("#" + buildIDableString(name) + "_lvi");
+    //obj.removeClass('collapsed').addClass('expanded');
+    obj.attr('style', 'display:block');
+    if (obj.parent("ul") && obj.parent("ul").hasClass("fa-ul")) {
+        obj.parent("ul").attr('style', 'display:block');
+    }
+    if (obj.parent("ul").parent("li")) {
+        expandListViewToObject(obj.parent("ul").parent("li"));
+    }
+}
+
+function scrollToCompInListView(compName) {
+    if ($('#' + buildIDableString(compName) + "_lvi").length > 0) {
+        expandListViewToName(compName);
+        $('html, body').animate({
+            scrollTop: ($('#' + buildIDableString(compName) + "_lvi").offset().top - LIST_VIEW_SCROLL_ITEM_OFFSET)
+        }, 500);
+    }
+}
+
+function generateCompetencyLineItemHtmlForListView(cpd, comp, frameworkName, hasChildren) {
+    var asArray = getAssertionsForCompetencyPacketData(cpd);
+    var conf = determineConfidenceForAssertions(asArray);
+    var liHtml = "<span class=\"competency-type\">" +
+        "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i>" +
+        "&nbsp;&nbsp;&nbsp;" +
+        "<a onclick=\"showCompetencyDetailsModal('" + escapeSingleQuote(comp.getId().trim()) + "');\">" +
+        "<i class=\"fa fa-info-circle\" title=\"Show more details\" aria-hidden=\"true\"></i></a></span>" +
+        "<h4 class=\"title\">";
+    if (hasChildren) liHtml += "<i class=\"fa-li fa fa-caret-right\"></i>";
+    if (comp.getName() != null) liHtml += comp.getName().trim() + "</h4>";
+    else liHtml += "</h4>";
+    if (comp.getDescription() != null) liHtml += "<p>" + comp.getDescription().trim() + "</p>";
+    return liHtml;
+}
+
+//TODO addChildToListView construct list view for multi node competency cluster
+function addChildToListView(parentUl, childCpd, frameworkName) {
+    var childLi = $("<li/>");
+    if (childCpd.cassNodePacket.getNodeList().length > 1) {
+        childLi.html("<i>TODO: construct list view for multi node competency cluster</i>");
+    } else {
+        var comp = childCpd.cassNodePacket.getNodeList()[0];
+        if (childCpd.children && childCpd.children.length > 0) childLi.addClass("collapsed");
+        childLi.attr("id", buildIDableString(comp.getName().trim()) + "_lvi");
+        var hasChildren = childCpd.children && childCpd.children.length > 0;
+        childLi.html(generateCompetencyLineItemHtmlForListView(childCpd, comp, frameworkName, hasChildren));
+        if (hasChildren) {
+            childCpd.children.sort(function (a, b) {return a.name.localeCompare(b.name);});
+            var childsChildUl = $("<ul/>");
+            childsChildUl.attr("class", "fa-ul");
+            childsChildUl.attr("style", "display:none");
+            $(childCpd.children).each(function (i, cc) {
+                addChildToListView(childsChildUl, cc, frameworkName);
+            });
+            childLi.append(childsChildUl);
+        }
+    }
+    parentUl.append(childLi);
+}
+
+function addFrameworkToListView(frameworkId) {
+    var d3fn = profileDisplayHelperData.frameworkHelperMap[frameworkId];
+    if (!d3fn || d3fn == null) return;
+    var frameworkLi = $("<li/>");
+    frameworkLi.attr("style", "display:block");
+    var frameworkLiHtml;
+    var frameworkName = getFrameworkName(frameworkId);
+    frameworkLi.attr("id", buildIDableString(frameworkName) + "_lvi");
+    if (d3fn.children && d3fn.children.length > 0) {
+        frameworkLi.addClass("expanded");
+        frameworkLiHtml = "<h4 class=\"root title\"><i class=\"fa-li fa fa-caret-down\"></i> " + frameworkName + "</h4>";
+    } else {
+        frameworkLiHtml = "<h4 class=\"title\">" + frameworkName + "</h4>";
+    }
+    frameworkLi.html(frameworkLiHtml);
+    if (d3fn.children && d3fn.children.length > 0) {
+        d3fn.children.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+        });
+        var childUl = $("<ul/>");
+        childUl.attr("class", "fa-ul");
+        childUl.attr("style", "display:block");
+        $(d3fn.children).each(function (i, c) {
+            addChildToListView(childUl, c, frameworkName);
+        });
+        frameworkLi.append(childUl);
+    }
+    $(PROF_CONTENTS_LIST).append(frameworkLi);
+}
+
+function buildListView() {
+    $(PROF_CONTENTS_LIST).empty();
+    for (var i = 0; i < applicableFrameworkList.length; i++) {
+        var fw = applicableFrameworkList[i];
+        debugMessage("Adding framework to list view: " + fw.shortId());
+        addFrameworkToListView(fw.shortId());
+    }
+    setCompetencyListViewActions();
+}
+
+//**************************************************************************************************
+// Graph View Sidebar (Right-Hand Side)
+//**************************************************************************************************
+
+function addCompetencyGraphSidebarParentToList(relatedList, d3Node) {
+    if (d3Node.parent) {
+        var itemName = getCompetencyOrFrameworkName( d3Node.parent.data.name.trim());
+        var cLiHtml = " <li title=\" Find '" + escapeSingleQuote(itemName) + "'\" onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(d3Node.parent.data.name.trim()) + "',true)\">" +
+            "<i class=\"fa-li fa fa-arrow-circle-up\"></i><a><strong>" + itemName + "</strong></a></li>";
+        relatedList.append(cLiHtml);
+    }
+}
+
+function addCompetencyGraphSidebarChildrenToList(relatedList, d3Node) {
+    if (d3Node.children) {
+        $(d3Node.children).each(function (i, c) {
+            var itemName = getCompetencyOrFrameworkName(c.data.name.trim());
+            var cLiHtml = " <li title=\" Find '" + escapeSingleQuote(itemName) + "'\" onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(c.data.name.trim()) + "',true)\">" +
+                "<i class=\"fa-li fa fa-arrow-circle-o-right\"></i><a>" + itemName + "</a></li>";
+            relatedList.append(cLiHtml);
+        });
+    }
+}
+
+function buildCompetencyGraphSidebarRelatedList(d3Node) {
+    var relatedList = $(CIR_FCS_DTL_REL_LIST);
+    relatedList.empty();
+    if (d3Node && (d3Node.children || d3Node.parent)) {
+        addCompetencyGraphSidebarParentToList(relatedList, d3Node);
+        addCompetencyGraphSidebarChildrenToList(relatedList, d3Node);
+    }
+}
+
+function buildGraphSidebarEvidenceDiv(evDivId, as, evArray) {
+    var evDiv = $("<div/>");
+    evDiv.addClass("cirAsrEvDiv");
+    evDiv.attr("id", evDivId);
+    evDiv.attr("style", "display:none");
+    var evUl = $("<ul/>");
+    $(evArray).each(function (i, ev) {
+        var evLi = $("<li/>");
+        var evLiHtml = "<a title=\"Show " + ev.type.toLowerCase() + " details\" onclick=\"showEvidenceDetailsModal('" + as.shortId() + "','" + ev.evIdx + "')\">";
+        evLiHtml += "<i class=\"fa " + getEvidenceTypeFAClass(ev.type) + "\" aria-hidden=\"true\"></i>&nbsp;";
+        evLiHtml += ev.name + "</a>";
+        evLi.html(evLiHtml);
+        evUl.append(evLi);
+    });
+    evDiv.append(evUl);
+    return evDiv;
+}
+
+function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
+    $(CIR_FCS_DTL_ASR_LIST_CTR).append("<span class=\"cirAsrSource\">" + sourceName + "</span>");
+    var sourceUl = $("<ul/>");
+    $(sourceAssertionArray).each(function (i, as) {
+        var sourceAsLi = $("<li/>");
+        sourceAsLi.addClass("cirAsrText");
+        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">...claims subject ";
+        var isNegativeAssertion = assertionNegativeMap[as.shortId()];
+        if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
+        else sourceAsLiHtml += "holds ";
+        sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
+        sourceAsLiHtml += buildConfidenceIcon(as.confidence);
+        sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
+        sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
+        var evArray = getEvidenceForAssertion(as);
+        var evDiv = null;
+        if (evArray && evArray.length > 0) {
+            var evDivId = buildIDableString(as.shortId() + "_evdiv_csr");
+            sourceAsLiHtml += "&nbsp;&nbsp;<a onclick=\"$('#" + evDivId + "').toggle();toggleEvDivInd($(this));\" " +
+                "title=\"View evidence\" class=\"button tiny evidIndToggle\">" + evArray.length +
+                "&nbsp;&nbsp;<i class=\"fa fa-chevron-right\"></i></a>";
+            evDiv = buildGraphSidebarEvidenceDiv(evDivId, as, evArray);
+        }
+        sourceAsLi.html(sourceAsLiHtml);
+        if (evDiv != null) sourceAsLi.append(evDiv);
+        sourceUl.append(sourceAsLi);
+    });
+    $(CIR_FCS_DTL_ASR_LIST_CTR).append(sourceUl);
+}
+
+function buildCompetencyGraphSidebarAssertionList(asArray) {
+    $(CIR_FCS_DTL_ASR_LIST_CTR).empty();
+    if (!asArray || asArray == null || asArray.length == 0) return;
+    var asrBySource = divideAssertionsBySource(asArray);
+    for (var source in asrBySource) {
+        if (asrBySource.hasOwnProperty(source)) addSourceAssertionsToGraphSidebar(source, asrBySource[source]);
+    }
+}
+
+function showCompetencyGraphSidebarSingleNodePacketDetails(cpd) {
+    var comp = cpd.cassNodePacket.getNodeList()[0];
+    scrollToNameInGraphViewSummary(comp.getName().trim());
+    $(CIR_FCS_COMP_TOOLS).show();
+    $(CIR_FCS_DTL_COMP_DTL_LINK).off("click").click(function () {
+        showCompetencyDetailsModal(comp.getId().trim());
+    });
+    $(CIR_FCS_DTL_SING_NAME).html(comp.getName().trim());
+    if (comp.getDescription() && comp.getDescription().trim().length > 0) {
+        $(CIR_FCS_DTL_SING_DESC).html(comp.getDescription().trim());
+    } else $(CIR_FCS_DTL_SING_DESC).html("<i>No description available</i>");
+    evidenceTrail = [];
+    var asArray = getAssertionsForCompetencyPacketData(cpd);
+    var conf = determineConfidenceForAssertions(asArray);
+    setUpCompetencyConfidenceView(conf, CIR_FCS_DTL_COMP_CONF);
+    buildCompetencyGraphSidebarAssertionList(asArray);
+    buildCompetencyGraphSidebarRelatedList(profileCompetencyData.competencyD3NodeTrackerMap[cpd.id].d3Node);
+    showCircleSidebarDetails();
+}
+
+function showCompetencyGraphSidebarFrameworkNodeDetails(frameworkId) {
+    var frameworkName = getFrameworkName(frameworkId);
+    scrollToNameInGraphViewSummary(frameworkName);
+    var frameworkDesc = getFrameworkDescription(frameworkId);
+    $(CIR_FCS_COMP_TOOLS).hide();
+    $(CIR_FCS_DTL_SING_NAME).html(frameworkName);
+    if (frameworkDesc && frameworkDesc.length > 0) $(CIR_FCS_DTL_SING_DESC).html(frameworkDesc);
+    else $(CIR_FCS_DTL_SING_DESC).html("<i>No description available</i>");
+    if (frameworkName == profileUserName) buildCompetencyGraphSidebarAssertionList(assertionList);
+    else buildCompetencyGraphSidebarAssertionList(getAssertionsForFramework(frameworkId));
+    buildCompetencyGraphSidebarRelatedList(profileCompetencyData.competencyD3NodeTrackerMap[frameworkId].d3Node);
+    if (frameworkName == profileUserName) {
+        hideCircleSidebarDetails();
+        removeAllGraphViewSummaryHighLighting();
+    }
+    else showCircleSidebarDetails();
+}
+
+
+function showCompetencyGraphSidebarMultiNodePacketDetails(cpd) {
+    alert("TODO: Build details for multi competency node package");
+}
+
+function showCircleGraphSidebarDetails (d3NodeName) {
+    hideCircleSidebarDetails();
+    lastExpCgSidebarD3NodeName = d3NodeName;
+    if (!d3NodeName || d3NodeName == null) return;
+    if (isFrameworkIdOrProfileUser(d3NodeName)) showCompetencyGraphSidebarFrameworkNodeDetails(d3NodeName);
+    else {
+        var cpd = profileCompetencyData.competencyPacketDataMap[d3NodeName];
+        if (!cpd || cpd == null) debugMessage("Cannot locate competency packet data for: " + d3NodeName);
+        else {
+            if (!cpd.cassNodePacket || cpd.cassNodePacket == null) debugMessage("cpt.cassNodePacket is null: " + d3NodeName);
+            else if (!cpd.cassNodePacket.getNodeList() || cpd.cassNodePacket.getNodeList() == null) debugMessage("cpt.cassNodePacket.getNodePacketList() is null: " + d3NodeName);
+            else if (cpd.cassNodePacket.getNodeList().length == 1) showCompetencyGraphSidebarSingleNodePacketDetails(cpd);
+            else showCompetencyGraphSidebarMultiNodePacketDetails(cpd);
+        }
+    }
+}
+
+//**************************************************************************************************
+// Graph View Summary (Left-Hand Side)
+//**************************************************************************************************
+
+function expandGraphViewSummaryToObject(expObj) {
+    if (expObj.hasClass("gpsiChild")) {
+        expObj.attr("style", "display:block");
+        if (expObj.parent().children().eq(1) && expObj.parent().children().eq(1).find("i:first")) {
+            var ic = expObj.parent().children().eq(0).find("i:first");
+            if (ic && (ic.hasClass("fa-chevron-circle-down") || ic.hasClass("fa-chevron-circle-right"))) {
+                ic.attr("class", "fa fa-chevron-circle-down");
+            }
+        }
+        if (expObj.parent() && expObj.parent().parent()) {
+            expandGraphViewSummaryToObject(expObj.parent().parent());
+        }
+    }
+}
+
+function removeAllGraphViewSummaryHighLighting() {
+    $(".psiItem.active").removeClass("active");
+}
+
+//TODO expandGraphViewSummaryToName think of something better than name
+function expandGraphViewSummaryToName(name) {
+    var obj = $("#" + buildIDableString(name) + "_psi");
+    removeAllGraphViewSummaryHighLighting();
+    obj.addClass("active");
+    var objPP = obj.parent().parent();
+    expandGraphViewSummaryToObject(objPP);
+}
+
+function scrollToNameInGraphViewSummary(name) {
+    if ($("#" + buildIDableString(name) + "_psi").length > 0) {
+        expandGraphViewSummaryToName(name);
+        $(CIR_FCS_SUM_LIST_CTR).scrollTo("#" + buildIDableString(name) + "_psi", 500);
+    }
+}
+
+function toggleGraphProfileSummaryChild(ce) {
+    if (ce.find('i:first').hasClass("fa-chevron-circle-right")) {
+        ce.find('i:first').attr("class", "fa fa-chevron-circle-down");
+        ce.parent().find('ul:first').attr("style", "display:block");
+    } else {
+        ce.find('i:first').attr("class", "fa fa-chevron-circle-right");
+        ce.parent().find('ul:first').attr("style", "display:none");
+    }
+}
+
+function generateCompetencyLineItemHtmlForGraphProfileSummary(comp, hasChildren) {
+    var liHtml = "";
+    if (hasChildren) liHtml += "<a onclick=\"toggleGraphProfileSummaryChild($(this))\"><i class=\"fa fa-chevron-circle-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>";
+    else liHtml += "<i class=\"fa fa-circle " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i>";
+    liHtml += "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(comp.getName().trim()) + "_psi" + "\" " +
+        "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(comp.getId().trim()) + "',true)\">" + comp.getName().trim() + "</a>";
+    return liHtml;
+}
+
+//TODO addChildToGraphProfileSummary construct list view for multi node competency cluster
+function addChildToGraphProfileSummary(parentUl, childCpd) {
+    var childLi = $("<li/>");
+    if (childCpd.cassNodePacket.getNodeList().length > 1) childLi.html("<i>TODO: construct list view for multi node competency cluster</i>");
+    else {
+        var comp = childCpd.cassNodePacket.getNodeList()[0];
+        var hasChildren = childCpd.children.length > 0;
+        childLi.html(generateCompetencyLineItemHtmlForGraphProfileSummary(comp, hasChildren));
+        if (hasChildren) {
+            childCpd.children.sort(function (a, b) {return a.name.localeCompare(b.name);});
+            var childsChildUl = $("<ul/>");
+            childsChildUl.attr("class", "fa-ul gpsiChild");
+            childsChildUl.attr("style", "display:none");
+            $(childCpd.children).each(function (i, cc) {
+                addChildToGraphProfileSummary(childsChildUl, cc);
+            });
+            childLi.append(childsChildUl);
+        }
+    }
+    parentUl.append(childLi);
+}
+
+function addChildrenToGraphProfileSummaryFrameworks() {
+    $(applicableFrameworkList).each(function (i, fw) {
+        var fnpg = frameworkNodePacketGraphMap[fw.shortId()];
+        if (fnpg && fnpg != null) {
+            var d3fn = profileDisplayHelperData.frameworkHelperMap[fw.shortId()];
+            if (!d3fn || d3fn == null) return;
+            if (d3fn.children && d3fn.children.length > 0) {
+                d3fn.children.sort(function (a, b) {
+                    return a.name.localeCompare(b.name);
+                });
+                var childUl = $("<ul/>");
+                childUl.attr("class", "fa-ul gpsiChild");
+                childUl.attr("style", "display:none");
+                $(d3fn.children).each(function (i, c) {
+                    addChildToGraphProfileSummary(childUl, c);
+                });
+                frameworkGraphSummaryLiMap[fw.shortId()].append(childUl);
+            }
+        }
+    });
+}
+
+//TODO categorizeFrameworksForSummary expand functionality
+function categorizeFrameworksForSummary() {
+    var frameworkCategories = {};
+    frameworkCategories["Personal"] = [];
+    frameworkCategories["Technical"] = [];
+    frameworkCategories["Other"] = [];
+    $(applicableFrameworkList).each(function (i, fw) {
+        var fnpg = frameworkNodePacketGraphMap[fw.shortId()];
+        if (fnpg && fnpg != null) {
+            var fwn = fw.name.trim().toLowerCase();
+            if (fwn.indexOf("programming") >= 0 ||
+                fwn.indexOf("database") >= 0 ||
+                fwn.indexOf("software") >= 0 ||
+                fwn.indexOf("engineering") >= 0) frameworkCategories["Technical"].push(fw);
+            else if (fwn.indexOf("leadership") >= 0 ||
+                fwn.indexOf("education") >= 0 ||
+                fwn.indexOf("spoken") >= 0 ||
+                fwn.indexOf("personal") >= 0) frameworkCategories["Personal"].push(fw);
+            else frameworkCategories["Other"].push(fw);
+        }
+    });
+    return frameworkCategories;
+}
+
+function addFrameworkCategoryToGraphProfileSummary(categoryName, fwArray) {
+    if (!fwArray || fwArray.length == 0) return;
+    var catDiv = $("<div/>");
+    catDiv.addClass("frameworkCategoryGraphSummaryContainer");
+    var catSpan = $("<span/>");
+    catSpan.addClass("frameworkCategoryGraphSummaryName");
+    catSpan.html(categoryName);
+    catDiv.append(catSpan);
+    var catUl = $("<ul/>");
+    catUl.addClass("fa-ul");
+    $(fwArray).each(function (i, fw) {
+        var fwLi = $("<li/>");
+        var fwLiHtml = "<a onclick=\"toggleGraphProfileSummaryChild($(this))\">" +
+            "<i class=\"fa fa-chevron-circle-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>" +
+            "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(fw.name.trim()) + "_psi" + "\" " +
+            "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(fw.shortId().trim()) + "',true)\">" +
+            fw.name.trim() + "</a>";
+        fwLi.html(fwLiHtml);
+        frameworkGraphSummaryLiMap[fw.shortId()] = fwLi;
+        catUl.append(fwLi);
+    });
+    catDiv.append(catUl);
+    $(CIR_FCS_SUM_LIST_CTR).append(catDiv);
+}
+
+function buildGraphProfileSummaryFrameworkCategories() {
+    $(CIR_FCS_SUM_LIST_CTR).empty();
+    frameworkGraphSummaryLiMap = {};
+    applicableFrameworkList.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    });
+    var frameworkCategories = categorizeFrameworksForSummary();
+    for (var category in frameworkCategories) {
+        if (frameworkCategories.hasOwnProperty(category)) {
+            addFrameworkCategoryToGraphProfileSummary(category, frameworkCategories[category]);
+        }
+    }
+}
+
+function buildUserGraphProfileSummary() {
+    if (isOwnProfile()) $(CIR_FCS_SUM_DESC).html(PROFILE_DESCRIPTION_OWN);
+    else $(CIR_FCS_SUM_DESC).html(PROFILE_DESCRIPTION_OTHER);
+    buildGraphProfileSummaryFrameworkCategories();
+    addChildrenToGraphProfileSummaryFrameworks();
+}
+
+//**************************************************************************************************
+// Profile Search Auto Complete
+//**************************************************************************************************
+
+function findItemByProfileSearchBar(selectedValue) {
+    if (competencySearchAutoCompleteMap.hasOwnProperty(selectedValue)) {
+        if ($(GRAPH_SCREEN).attr("style").indexOf("none") < 0) {
+            zoomExpCircleGraphByAutoComplete(selectedValue);
+        }
+        else {
+            scrollToCompInListView(selectedValue);
+        }
+    }
+}
+
+function buildProfileSearchAutoCompleteDataFromAutoCompleteMap() {
+    var data = [];
+    for (var property in competencySearchAutoCompleteMap) {
+        if (competencySearchAutoCompleteMap.hasOwnProperty(property)) {
+            data.push(property);
+        }
+    }
+    return data;
+}
+
+function fillInProfileSearchAutoComplete() {
+    $(PROF_SRCH_INPT).autocomplete({
+        source: buildProfileSearchAutoCompleteDataFromAutoCompleteMap(),
+        select: function (event, ui) {
+            findItemByProfileSearchBar(ui.item.label);
+        }
+    });
+}
+
+//**************************************************************************************************
+// Explorer Circle Graph Supporting Functions
+//**************************************************************************************************
+
+//d.data.name should be the competency ID, framework ID, or profile user name if the circle is the outer circle....
+function getExplorerCgCircleText(d) {
+    if (!d || !d.data || !d.data.name) return "UNDEFINED 'D'";
+    else if (profileCompetencyData.competencyD3NodeTrackerMap[d.data.name]) {
+        var text = getCompetencyOrFrameworkName(d.data.name);
+        if (text == "") text = "UNDEFINED NODE PACKET";
+        return text;
+    }
+    return "UNDEFINED NAME";
+}
+
+function getCompetencyD3NodeTracker(compId) {
+    return profileCompetencyData.competencyD3NodeTrackerMap[compId];
+}
+
+function getCassNodePacket(compId) {
+    var cpd = profileCompetencyData.competencyPacketDataMap[compId];
+    if (!cpd) return null;
+    else return cpd.cassNodePacket;
+}
+
+//**************************************************************************************************
+// Build Profile Display
+//**************************************************************************************************
+
+function buildProfileDisplays() {
+    showPageAsBusy("Building profile display...");
+    clearFrameworkExpCircleSvg();
+    buildExpGraphCircles(null, JSON.parse(profileD3NodeString));
+    buildUserGraphProfileSummary();
+    buildListView();
+    buildCredentialView();
+    showPageMainContentsContainer();
+    fillInProfileSearchAutoComplete();
+    clearProfileSearchBar();
+    showProfileSearchBar();
+    hasFinishedLoading = true;
+    enableViewToggleButtons();
+    showAllProfileExpTools();
+}
+
+
+//**************************************************************************************************
+// Display Data Building
+//**************************************************************************************************
+
+function buildProfileDisplayData() {
+    showPageAsBusy("Preparing data for display...");
+    profileDisplayHelperData = setUpD3ProfileNodes(profileUserName,applicableFrameworkList,profileCompetencyData);
+    profileD3NodeString = buildD3JsonString(profileDisplayHelperData.profileHelper);
+    debugMessage("profileCompetencyData: ");
+    debugMessage(profileCompetencyData);
+    debugMessage("profileDisplayHelperData: ");
+    debugMessage(profileDisplayHelperData);
+    debugMessage("d3ProfileNode JSON String:");
+    debugMessage(profileD3NodeString);
+    buildProfileDisplays();
+}
+
+//**************************************************************************************************
 // Framework Collapsing
 //**************************************************************************************************
 
-//TODO LEFT OFF HERE
+function registerCompetencyFramework(competencyId,frameworkId) {
+    var ecf = applicableFrameworkMap[frameworkId];
+    if (ecf) {
+        if (!competencyFrameworkMap[competencyId]) competencyFrameworkMap[competencyId] = {};
+        competencyFrameworkMap[competencyId][ecf.shortId()] = ecf;
+    }
+}
+
+function buildCompetencyFrameworkMap() {
+    for (var frameworkId in applicableFrameworkMap) {
+        if (applicableFrameworkMap.hasOwnProperty(frameworkId)) {
+            var cpdArray = profileCompetencyData.frameworkCompetencyPacketDataArrayMap[frameworkId];
+            $(cpdArray).each(function (i, cpd) {
+                registerCompetencyFramework(cpd.id,frameworkId);
+            });
+        }
+    }
+}
+
+function processCollapsedFrameworkData() {
+    showPageAsBusy("Processing collapsed data...");
+    profileCompetencyData = buildProfileFrameworkCompetencyData(applicableFrameworkList,frameworkNodePacketGraphMap,competencyAssertionMap);
+    buildCompetencyFrameworkMap();
+    buildProfileDisplayData();
+}
 
 function checkAllApplicableFrameworksCollapsed() {
     if (frameworksCollapsed >= frameworksToCollapse) {
         debugMessage("All frameworks collapsed..");
         debugMessage(frameworkNodePacketGraphMap);
-        buildFrameworkCompetencyCluseterNodeArrays();
+        processCollapsedFrameworkData();
     }
 }
 
@@ -727,8 +1963,10 @@ function fetchAssertions() {
 function setUpProfileUserAndFetchAssertions(puName, puPem) {
     profileUserName = puName;
     setProfileName(profileUserName);
+    showMainMenu();
     profileUserPkPem = puPem;
     hideProfileExpTools();
+    hideCircleSidebarDetails();
     disableViewToggleButtons();
     showPageAsBusy("Fetching user assertions...");
     fetchAssertions();
@@ -743,6 +1981,7 @@ function setUpForProfileUserSearch() {
     fillInProfileUserSearchAutoComplete();
     showOnlyOpenProfileTools();
     showProfileUserSearchContainer();
+    hideMainMenu();
 }
 
 //**************************************************************************************************

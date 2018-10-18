@@ -24,7 +24,8 @@ function competencyD3NodeTracker(id, isFramework) {
     this.d3Node = {};
 }
 
-function frameworkCompetencyData() {
+function profileCompetencyDataStrct() {
+    this.frameworkCompetencyPacketDataArrayMap = {};
     this.competencyPacketDataMap = {};
     this.competencyD3NodeTrackerMap = {};
 }
@@ -35,6 +36,11 @@ function d3CustomNode(nodeName) {
     this.children = [];
 }
 
+function profileDisplayHelperDataStrct(profUserName) {
+    this.frameworkHelperMap = {};
+    this.profileHelper = new d3CustomNode(profUserName);
+}
+
 //**************************************************************************************************
 // D3 Nodes Building
 //**************************************************************************************************
@@ -42,82 +48,145 @@ function d3CustomNode(nodeName) {
 function addD3Sizing(parentNode) {
     if (!parentNode.children || parentNode.children.length == 0) parentNode.size = 1;
     else {
-        childrenNodes = parentNode.children;
+        var childrenNodes = parentNode.children;
         $(childrenNodes).each(function (i, cn) {
             addD3Sizing(cn);
         })
     }
 }
 
-function addRootCompetenciesToD3FrameworkNode(d3Fn,frameworkCompetencyData) {
-    var fcdCompetencyPacketDataMap = frameworkCompetencyData.competencyPacketDataMap;
-    for (var packetId in fcdCompetencyPacketDataMap) {
-        if (fcdCompetencyPacketDataMap.hasOwnProperty(packetId)) {
-            var cpd = fcdCompetencyPacketDataMap[packetId];
-            if (cpd.parents.length <= 0) d3Fn.children.push(cpd);
+function addAssertedChildrenToD3FrameworkNode(currentD3FrameworkNode, cpdChild) {
+    if (cpdChild.hasAssertion) currentD3FrameworkNode.children.push(cpdChild);
+    else {
+        for (var j = 0; j < cpdChild.children.length; j++) {
+            addAssertedChildrenToD3FrameworkNode(currentD3FrameworkNode, cpdChild.children[j]);
         }
     }
 }
 
-function setUpD3FrameworkNodes(frameworkName,frameworkCompetencyData) {
-    var d3Fn = new d3CustomNode(frameworkName);
-    addRootCompetenciesToD3FrameworkNode(d3Fn,frameworkCompetencyData);
-    addD3Sizing(d3Fn);
-    return d3Fn;
+function addFrameworkD3NodeTracker(pcd,frameworkId) {
+    var fdt = new competencyD3NodeTracker(null,true);
+    fdt.frameworkId = frameworkId;
+    pcd.competencyD3NodeTrackerMap[frameworkId] = fdt;
 }
 
-function addFrameworkD3NodeTracker(fcd,frameworkName) {
-    var fdt = new competencyD3NodeTracker(frameworkName,true);
-    fdt.frameworkId = frameworkName;
-    fcd.competencyD3NodeTrackerMap[frameworkName] = fdt;
+function buildD3FrameworkNode(frameworkId,frameworkName,pcd) {
+    if (frameworkName == null) return null;
+    var currentD3FrameworkNode = new d3CustomNode(frameworkName);
+    currentD3FrameworkNode.id = frameworkId;
+    var cpdArray = pcd.frameworkCompetencyPacketDataArrayMap[frameworkId];
+    $(cpdArray).each(function (i, cpd) {
+        if (cpd.parents.length <= 0) {
+            if (cpd.hasAssertion) currentD3FrameworkNode.children.push(cpd);
+            else {
+                for (var k = 0; k < cpd.children.length; k++) {
+                    addAssertedChildrenToD3FrameworkNode(currentD3FrameworkNode, cpd.children[k]);
+                }
+            }
+        }
+    });
+    addD3Sizing(currentD3FrameworkNode);
+    addFrameworkD3NodeTracker(pcd,frameworkId);
+    return currentD3FrameworkNode;
+}
+
+function setUpD3ProfileNodes(profUserName,frameworkList,pcd) {
+    var pdhd = new profileDisplayHelperDataStrct(profUserName);
+    for (var i = 0; i < frameworkList.length; i++) {
+        var fw = frameworkList[i];
+        debugMessage("Building D3 framework node for: " + fw.shortId());
+        var d3Fn = buildD3FrameworkNode(fw.shortId(),fw.getName(),pcd);
+        if (d3Fn != null) {
+            if (d3Fn.children && d3Fn.children.length > 0) {
+                pdhd.frameworkHelperMap[fw.shortId()] = d3Fn;
+                pdhd.profileHelper.children.push(d3Fn);
+            }
+        }
+    }
+    addFrameworkD3NodeTracker(pcd,profUserName);
+    return pdhd;
 }
 
 //**************************************************************************************************
 // Cluster Node Data Building
 //**************************************************************************************************
 
-function getCompetencyPacketForNodePacket(fcd,nodePacket) {
-    return fcd.competencyPacketDataMap[generateIdFromCassNodePacket(nodePacket)];;
+
+function doesCompetencyHaveAssertion(compId, compAssrMap) {
+    if (!compAssrMap[compId] || compAssrMap[compId] == null) return false;
+    else return true;
 }
 
-function parseCompetencyNodePacketRelations(fcd,fnpg) {
+function cassNodePacketHasAssertion(cassNodePacket, compAssrMap) {
+    var nl = cassNodePacket.getNodeList();
+    for (var j = 0; j < nl.length; j++) {
+        var n = nl[j];
+        if (doesCompetencyHaveAssertion(n.getId(),compAssrMap)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getCompetencyPacketForNodePacket(cpdMap, nodePacket) {
+    return cpdMap[generateIdFromCassNodePacket(nodePacket)];
+}
+
+function addCompetencyPacketDataRelationships(cpdMap, fnpg) {
     var fnpgRelationList = fnpg.getRelationList();
     $(fnpgRelationList).each(function (i, fnpgRelation) {
-        var sourcePacketData = getCompetencyPacketForNodePacket(fcd,fnpgRelation.getSource());
-        var targetPacketData = getCompetencyPacketForNodePacket(fcd,fnpgRelation.getTarget());
+        var sourcePacketData = getCompetencyPacketForNodePacket(cpdMap, fnpgRelation.getSource());
+        var targetPacketData = getCompetencyPacketForNodePacket(cpdMap, fnpgRelation.getTarget());
         var relType = fnpgRelation.getType();
         if ("BROADENS" == relType.toString().toUpperCase() || "REQUIRES" == relType.toString().toUpperCase()) {
             if (!sourcePacketData.children.includes(targetPacketData)) sourcePacketData.children.push(targetPacketData);
             if (!targetPacketData.parents.includes(sourcePacketData)) targetPacketData.parents.push(sourcePacketData);
-        }
-        else if ("NARROWS" == relType.toString().toUpperCase() || "IS_REQUIRED_BY" == relType.toString().toUpperCase()) {
+        } else if ("NARROWS" == relType.toString().toUpperCase() || "IS_REQUIRED_BY" == relType.toString().toUpperCase()) {
             if (!sourcePacketData.parents.includes(targetPacketData)) sourcePacketData.parents.push(targetPacketData);
             if (!targetPacketData.children.includes(sourcePacketData)) targetPacketData.children.push(sourcePacketData)
         }
     });
 }
 
-function parseCompetencyNodePackets(fcd,fnpg,frameworkId,frameworkName) {
-    var fnpgPacketList = fnpg.getNodePacketList();
-    $(fnpgPacketList).each(function (i, fnpgPacket) {
-        var packetId = generateIdFromCassNodePacket(fnpgPacket);
-        var packetName = generateNameFromCassNodePacket(fnpgPacket);
+function generateCompetencyPacketDataArray(pcd, fnpg, cpdMap, frameworkId, compAssrMap) {
+    var cpdArray = [];
+    var fnpgNodePacketList = fnpg.getNodePacketList();
+    $(fnpgNodePacketList).each(function (i, nodePacket) {
+        var packetId = generateIdFromCassNodePacket(nodePacket);
+        var packetName = generateNameFromCassNodePacket(nodePacket);
         if (packetId && packetId.length > 0 && packetName && packetName.length > 0) {
-            var cpd = new competencyPacketData(fnpgPacket);
-            fcd.competencyPacketDataMap[packetId] = cpd;
+            var cpd = new competencyPacketData(nodePacket);
+            cpd.hasAssertion = cassNodePacketHasAssertion(nodePacket, compAssrMap);
+            cpdArray.push(cpd);
+            cpdMap[packetId] = cpd;
             var cdt = new competencyD3NodeTracker(packetId,false);
             cdt.frameworkId = frameworkId;
-            fcd.competencyD3NodeTrackerMap[packetId] = cdt;
+            pcd.competencyD3NodeTrackerMap[packetId] = cdt;
         }
     });
-    addFrameworkD3NodeTracker(fcd,frameworkName);
+    return cpdArray;
 }
 
-function buildFrameworkCompetencyData(frameworkId,frameworkName,fnpg) {
-    var fcd = new frameworkCompetencyData();
-    parseCompetencyNodePackets(fcd,fnpg,frameworkId,frameworkName);
-    parseCompetencyNodePacketRelations(fcd,fnpg);
-    return fcd;
+function buildFrameworkCompetencyData(pcd,frameworkId,fnpgMap,compAssrMap,competencyPacketDataMap) {
+    var fnpg = fnpgMap[frameworkId];
+    if (fnpg && fnpg != null) {
+        var cpdArray = generateCompetencyPacketDataArray(pcd, fnpg, competencyPacketDataMap, frameworkId, compAssrMap);
+        addCompetencyPacketDataRelationships(competencyPacketDataMap, fnpg);
+        pcd.frameworkCompetencyPacketDataArrayMap[frameworkId] = cpdArray;
+    }
+    else debugMessage("buildFrameworkCompetencyData - nodePacketGraph not found for: " + frameworkId);
+}
+
+function buildProfileFrameworkCompetencyData(frameworkList,fnpgMap,compAssrMap) {
+    var cpdm = {};
+    var pcd = new profileCompetencyDataStrct();
+    for (var i = 0; i < frameworkList.length; i++) {
+        var fw = frameworkList[i];
+        debugMessage("building profile framework competency data for: " + fw.shortId());
+        buildFrameworkCompetencyData(pcd,fw.shortId(),fnpgMap,compAssrMap,cpdm);
+    };
+    pcd.competencyPacketDataMap = cpdm;
+    return pcd;
 }
 
 //**************************************************************************************************

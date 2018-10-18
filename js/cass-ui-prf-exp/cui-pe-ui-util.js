@@ -12,6 +12,8 @@ const DEBUG_ALERT = false;
 
 const LIST_VIEW_SCROLL_ITEM_OFFSET = 220;
 
+const EXP_CIR_COLOR_RANGE = "blue";
+
 // Screens
 const GRAPH_SCREEN_SIMPLE = "graph-screen";
 const GRAPH_SCREEN = "#" + GRAPH_SCREEN_SIMPLE;
@@ -33,9 +35,24 @@ const CASSUI_MODAL_BUSY_TXT = ".cassUiModalBusyText";
 const CASSUI_MODAL_ERROR_CTR = ".cassUiModalErrorCtr";
 const CASSUI_MODAL_ERROR_TXT = ".cassUiModalErrorText";
 
+const CIR_FCS_DTL_CTR = "#circleFocusDetailsSidebar";
+const CIR_FCS_DTL_REL_LIST = "#circleFocusDetailsRelList";
+const CIR_FCS_DTL_SING_NAME = "#circleFocusDetailsSingleName";
+const CIR_FCS_DTL_SING_DESC = "#circleFocusDetailsSingleDesc";
+const CIR_FCS_COMP_TOOLS = "#circleFocusCompTools";
+const CIR_FCS_DTL_COMP_DTL_LINK = "#circleFocusCompDetailsLink";
+const CIR_FCS_DTL_COMP_CONF = "#circleFocusCompConfIcon";
+const CIR_FCS_DTL_ASR_LIST_CTR = "#circleFocusDetailsAssertionListContainer";
+
+const CIR_FCS_SUM_DESC = "#circleFocusSummaryDesc";
+const CIR_FCS_SUM_LIST_CTR = "#circleFocusSummaryListContainer";
+
+const CIR_FCS_SUM_ITEM_CLASS_ID = "gpsi";
+
 const SHOW_GRAPH_VIEW_BTN = "#showGraphViewBtn";
 const SHOW_LIST_VIEW_BTN = "#showListViewBtn";
 
+const PROF_EXP_MAIN_MENU = "#section-sub-menu";
 const PROF_EXP_PAGE_TOOLS = "#page-tools";
 const PROF_DISP_TOOLS = "#displayedProfileTools";
 
@@ -273,6 +290,46 @@ if ( typeof String.prototype.endsWith != 'function' ) {
 //**************************************************************************************************
 // Profile Explorer Page UI Functions
 //**************************************************************************************************
+
+function hideMainMenu() {
+    $(PROF_EXP_MAIN_MENU).hide();
+}
+
+function showMainMenu() {
+    $(PROF_EXP_MAIN_MENU).show();
+}
+
+function showListViewMainContentsScreen() {
+    showPageMainContentsContainer();
+    showScreen(LIST_SCREEN_SIMPLE);
+    currentScreen = LIST_SCREEN_SIMPLE;
+}
+
+function showGraphViewMainContentsScreen() {
+    showPageMainContentsContainer();
+    showScreen(GRAPH_SCREEN_SIMPLE);
+    $("html, body").animate({ scrollTop: 0 }, 500);
+    currentScreen = GRAPH_SCREEN_SIMPLE;
+}
+
+function enableViewToggleButtons() {
+    $(SHOW_GRAPH_VIEW_BTN).removeAttr("disabled");
+    $(SHOW_LIST_VIEW_BTN).removeAttr("disabled");
+}
+
+function disableViewToggleButtons() {
+    $(SHOW_GRAPH_VIEW_BTN).attr("disabled", "true");
+    $(SHOW_LIST_VIEW_BTN).attr("disabled", "true");
+}
+
+function showCircleSidebarDetails() {
+    $(CIR_FCS_DTL_CTR).removeClass("hide");
+}
+
+function hideCircleSidebarDetails() {
+    $(CIR_FCS_DTL_CTR).addClass("hide");
+}
+
 function hideProfileSearchBar() {
     $(PROF_SRCH_CTR).hide();
 }
@@ -283,6 +340,10 @@ function showProfileSearchBar() {
 
 function clearProfileSearchBar() {
     $(PROF_SRCH_INPT).val("");
+}
+
+function clearAllSearchBars() {
+    clearProfileSearchBar();
 }
 
 function hideProfileExpTools() {
@@ -385,6 +446,43 @@ $('#list-screen__root li').on('click', 'h3, h4, .fa-li', function (evt) {
         // not expandable, do nothing.
     }
 });
+
+function setCompetencyListViewActions() {
+    $('#list-screen__root li').on('click', 'h3, h4, .fa-li', function (evt) {
+        // keep click event from bubbling up through all nested lists items
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        // switch between classes: expanded and collapsed
+        // switch out list icons for .fa-li items
+
+        var obj = $(this).closest('li');
+        var action = 'none';
+
+        if (obj.hasClass('collapsed')) action = "expand";
+        if (obj.hasClass('expanded')) action = "collapse";
+
+        $("#profileSearchInput").val("");
+
+        switch (action) {
+            case 'expand':
+                obj.removeClass('collapsed').addClass('expanded');
+                obj.children('.title').children('.fa-li').removeClass('fa-caret-right').addClass('fa-caret-down');
+                obj.children('ul').slideDown('fast');
+                break;
+
+            case 'collapse':
+                obj.removeClass('expanded').addClass('collapsed');
+                obj.children('.title').children('.fa-li').addClass('fa-caret-right').removeClass('fa-caret-down');
+                obj.children('ul').slideUp('fast');
+
+                break;
+
+            default:
+            // not expandable, do nothing.
+        }
+    });
+}
 
 //**************************************************************************************************
 // JQuery Functions

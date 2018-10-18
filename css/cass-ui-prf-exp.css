@@ -103,6 +103,28 @@ input:checked~.switch-paddle {
     border-color: #EA6E07;
 }
 
+.fa-chevron-circle-down,
+.fa-chevron-circle-right {
+    color: black !important;
+}
+
+/* ---- BADGES ---- */
+
+.cass-badge {
+    font-size: smaller;
+    text-align: center;
+}
+
+.cass-badge > span {
+    display: block;
+    margin-top: 8px;
+}
+
+.icon-degree {
+    background: transparent url(../img/icon-degree.png) center no-repeat;
+    background-size: contain;
+}
+
 /* ---- MENUS ---- */
 
 #section-sub-menu {
@@ -265,6 +287,171 @@ input:checked~.switch-paddle {
 
 /* ---- MISC ---- */
 
+.asrValdSource {
+    font-weight: bold;
+}
+
+.asrValdComp {
+    font-style: italic;
+}
+
+#asrValdResultsList,
+#asrShareAssignPortfolioContactsList {
+    margin: .5rem 0;
+}
+
+#asrValdResultsList {
+    margin-left:1rem;
+}
+
+#asrValdResultsList .asrValdValid,
+#asrValdResultsList .asrValdInValid {
+    font-size:1.2rem;
+}
+
+.asrValdValid {
+    color:#1C8801;
+}
+
+.asrValdInValid {
+    color:#DB3838;
+}
+
+#asrValdResultsList li:hover {
+    background-color: #DCF3FE;
+}
+
+#asrValdResultsList li:not(:last-child) {
+    border-bottom: 1px solid #d9d9d9;
+}
+
+#asrValdResultsListContainer,
+#asrShareAssignPortfolioListContainer,
+#asrShareAssignPortfolioContactsListContainer {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: auto;
+    margin-bottom: 1.5rem;
+    width: 80%;
+    background-color: #cceeff;
+    border-color: #d9d9d9;
+    border-style: solid;
+    border-radius: 5px;
+    border-width: 1px;
+}
+
+#asrValdResultsListContainer {
+    width:95%;
+}
+
+#asrShareAssignPortfolioListContainer ul,
+#asrShareAssignPortfolioContactsList ul {
+    margin-bottom: 0;
+}
+
+#asrShareAssignPortfolioListContainer li label,
+#asrShareAssignPortfolioContactsList li label {
+    font-size: 1.15rem;
+}
+
+#asrShareAssignPortfolioListContainer li input[type=checkbox],
+#asrShareAssignPortfolioContactsList li input[type=checkbox] {
+    zoom: 1.2;
+    margin: 0;
+}
+
+.portfolioContentsIcon {
+    font-size: 1.2rem;
+}
+
+.portfolioAssertionContents {
+    font-size: .8rem;
+}
+
+.portfolioAssertionContents ul li {
+    list-style-type: circle;
+}
+
+.removeAlignmentComp {
+    color: #BA0903;
+}
+
+.compRelAlignmentHdr,
+.cirAsrSource,
+.cdmAsrSource {
+    font-size: .95rem;
+    font-weight: 600;
+    color: #000000;
+}
+
+.cirAsrText {
+    display:block !important;
+}
+
+.compRelAlignmentText,
+.cirAsrText,
+.cirAsrText a,
+.cdmAsrText,
+.cdmAsrText a {
+    font-size: .9rem;
+    font-weight: 500;
+    color: #0b445b;
+}
+
+.evidIndToggle {
+    font-size: .7rem !important;
+    padding: 3px 4px;
+    background-color: #0b445b !important;
+    color: #ffffff !important;
+    margin-bottom: .4rem;
+}
+
+.assertionShareIcon {
+    font-size: 1.2rem !important;
+    color: #1DA7A7 !important;
+}
+
+.cirAsrEvDiv,
+.cdmAsrEvDiv {
+    margin-left: 1rem;
+}
+
+.cirAsrEvDiv a,
+.cdmAsrEvDiv a {
+    color: #116688;
+}
+
+#compDetAsrContainer span {
+    margin-left: 2rem;
+}
+
+#compDetAsrContainer span.label {
+    margin-left: 0;
+}
+
+#compDetAsrContainer ul {
+    margin-left: 4rem;
+}
+
+#evDetPrevContainer {
+    text-align: center;
+}
+
+#pdfPreviewObj,
+#htmlPreviewObj {
+    height: 400px;
+    width: 400px;
+}
+
+#imagePreviewObj {
+    height: 200px;
+    width: auto;
+}
+
+#profileHeader {
+    color: rgb(17, 116, 154);
+}
+
 #profileHeader,
 #circleFocusSummaryName {
     cursor: pointer;
@@ -281,6 +468,15 @@ input:checked~.switch-paddle {
 
 #circleFocusSummarySidebar {
     padding-left: 1.5rem;
+}
+
+#circleFocusDetailsAssertionListContainer ul {
+    list-style: none;
+    margin-bottom: 0;
+}
+
+#circleFocusSummarySidebar h3 {
+    color: rgb(17,116,154);
 }
 
 #circleFocusSummarySidebar h3,
@@ -311,3 +507,91 @@ input:checked~.switch-paddle {
     text-align: right;
 }
 
+#circleFocusDetailsRelListContainer {
+    margin-top: 1.5rem;
+}
+
+#circleFocusDetailsRelList a {
+    color: black !important;
+}
+
+#circleFocusDetailsRelList a:hover {
+    color: rgb(17,116,154); !important;
+}
+
+.asrHolds {
+    color: #009933;
+}
+
+.asrNotHolds {
+    color: #cc2900;
+}
+
+.highConf {
+    color: rgb(0, 128, 43);
+}
+
+.midHighConf {
+    color: rgb(0, 128, 43);
+    background: rgb(0, 128, 43);
+    background: linear-gradient(90deg, rgba(0, 128, 43, 1) 79%, rgba(0, 128, 43, 0.2) 80%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.midConf {
+    color: rgb(191, 184, 0);
+    background: rgb(191, 184, 0);
+    background: linear-gradient(90deg, rgba(191, 184, 0, 1) 60%, rgba(191, 184, 0, 0.2) 61%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.midLowConf {
+    color: rgb(173, 90, 8);
+    background: rgb(173, 90, 8);
+    background: linear-gradient(90deg, rgba(173, 90, 8, 1) 35%, rgba(173, 90, 8, 0.2) 36%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.lowConf {
+    color: rgb(204, 41, 0);
+    background: rgb(204, 41, 0);
+    background: linear-gradient(90deg, rgba(204, 41, 0, 1) 19%, rgba(204, 41, 0, 0.2) 20%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+#compCredentialDegreeCertsContainer span {
+    margin-bottom: 2rem;
+}
+
+.gpsi {
+    color: black;
+}
+
+.gpsiRootComp {
+    font-size: 1.05rem;
+}
+
+.gpsiNonRootComp {}
+
+.gpsiChild {
+    margin-left: 1.2rem;
+    font-size: 1rem;
+}
+.psiItem {
+    color: black;
+}
+.psiItem.active {
+    font-weight: bold;
+}
