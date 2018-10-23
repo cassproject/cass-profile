@@ -409,8 +409,7 @@ function isAssertionValidationTypeValid() {
     var types = $(ASR_VALD_TYPES).val();
     if (!types || types.length == 0) {
         isValid = false;
-        $(ASR_VALD_ERROR_TEXT).html("You must select at least one type of validation");
-        $(ASR_VALD_ERROR_CTR).show();
+        showModalError(ASR_VALD_MODAL,"You must select at least one type of validation");
     }
     return isValid;
 }
