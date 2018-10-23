@@ -2248,9 +2248,9 @@ function setProfileUserAsLoggedInUserAndGo() {
 
 function setUpForProfileUserSearch() {
     fillInProfileUserSearchAutoComplete();
-    showOnlyOpenProfileTools();
-    showProfileUserSearchContainer();
     hideMainMenu();
+    clearProfileUserSearchBar();
+    showProfileUserSearchContainer();
 }
 
 //**************************************************************************************************

@@ -52,6 +52,7 @@ const CIR_FCS_SUM_ITEM_CLASS_ID = "gpsi";
 const SHOW_GRAPH_VIEW_BTN = "#showGraphViewBtn";
 const SHOW_LIST_VIEW_BTN = "#showListViewBtn";
 
+const PROF_EXP_MAIN_MENU_CTR = "#ssmStickyCtr";
 const PROF_EXP_MAIN_MENU = "#section-sub-menu";
 const PROF_EXP_PAGE_TOOLS = "#page-tools";
 const PROF_DISP_TOOLS = "#displayedProfileTools";
@@ -286,10 +287,12 @@ if ( typeof String.prototype.endsWith != 'function' ) {
 //**************************************************************************************************
 
 function hideMainMenu() {
+    $(PROF_EXP_MAIN_MENU_CTR).hide();
     $(PROF_EXP_MAIN_MENU).hide();
 }
 
 function showMainMenu() {
+    $(PROF_EXP_MAIN_MENU_CTR).show();
     $(PROF_EXP_MAIN_MENU).show();
 }
 
@@ -336,8 +339,13 @@ function clearProfileSearchBar() {
     $(PROF_SRCH_INPT).val("");
 }
 
+function clearProfileUserSearchBar() {
+    $(PROF_USR_SRCH_INPT).val("");
+}
+
 function clearAllSearchBars() {
     clearProfileSearchBar();
+    clearProfileUserSearchBar();
 }
 
 function hideProfileExpTools() {
