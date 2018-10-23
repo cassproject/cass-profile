@@ -1,5 +1,5 @@
 //**************************************************************************************************
-// CASS UI Profile Explorer D3 Utility Functions
+// CASS UI Framework Explorer D3 Utility Functions
 //**************************************************************************************************
 
 // TODO fix zooming behavior when clicking on text instead of circle
@@ -57,7 +57,7 @@ const ORANGE_RANGE_1 = "rgba(199,96,40,1)";
 var competencySearchAutoCompleteMap;
 
 var expSvg = d3.select(EXP_CIRCLE_PACK);
-var expCgMargin = 20;
+var expCgMargin = 0;
 var expCgDiameter = +expSvg.attr("width");
 var expCirclePackGraph =   expSvg;
 
@@ -114,6 +114,10 @@ function getExpColorRangeParm3() {
     else if (EXP_CIR_COLOR_RANGE.toLowerCase() == "burgendy") return BURGENDY_RANGE_3;
     else if (EXP_CIR_COLOR_RANGE.toLowerCase() == "green") return TEAL_RANGE_3;
     else return BLUE_RANGE_3;
+}
+
+function removeAllExpCgCircleInvalidClasses() {
+    $(".expCircleGraph .node").removeClass("invalid");
 }
 
 function clearFrameworkExpCircleSvg() {
@@ -248,6 +252,75 @@ function generateExpCgCircleExtendedClass(compId) {
     else return null;
 }
 
+/******************************************************************
+ Build presentable array of words, first splice all words in title into separate string array elements, combine small words with smallest neighbor and return.
+ *******************************************************************/
+function getDisplayTitle(d, text) {
+    var text = text;
+    var cleanWords = text.text().replace(/-/g, " - ").replace(/\//g, " / ").replace(/ +/g," ");
+    var wordAttempt = cleanWords.split(/ (?=[A-Za-z-\/])/g);
+    var lastLength = 0;
+    while (wordAttempt.length != lastLength) {
+        var maxLength = 0;
+        lastLength = wordAttempt.length;
+        for (var i = 0; i < wordAttempt.length; i++)
+            maxLength = Math.max(wordAttempt[i].length, maxLength);
+        for (var i = 1; i < wordAttempt.length; i++)
+            if (wordAttempt[i].length <= 2 || wordAttempt[i - 1].length + wordAttempt[i].length < maxLength) {
+                wordAttempt[i - 1] = wordAttempt[i - 1] + " " + wordAttempt[i];
+                wordAttempt.splice(i, 1);
+            }
+    }
+    try {
+        if (wordAttempt.length > 4) {
+            wordAttempt.splice(4, wordAttempt.length - 4);
+            wordAttempt[wordAttempt.length-1] += "...";
+        }
+        return createDisplayTitleSpans(wordAttempt.reverse(), text, d);
+    }catch(ex){
+        console.error(ex);
+        throw ex;
+    }
+}
+
+/******************************************************************
+ Build tspan filled with svg text based on ourput display title
+ array.
+ *******************************************************************/
+function createDisplayTitleSpans(words, text, d) {
+    var word;
+    var line = [];
+    var lineNumber = 0;
+    var lineHeight = .9; // ems
+    var y = 0;
+    var dy = 0;
+    var textY = (words.length * lineHeight)/2;
+    var tspan = text.text(null)
+        .append("tspan")
+        .attr("x", 0)
+        .attr("dy", dy +"em")
+    while (word = words.pop()) {
+        line.push(word);
+        lineNumber++;
+        dy = lineHeight * lineNumber - textY;
+        tspan = text
+            .append("tspan")
+            .attr("x", 0)
+            .attr("y", y)
+            .attr("dy", dy + "em")
+            .text(word);
+    }
+}
+
+function truncCircleText(str,textLimit) {
+    return str;
+}
+
+function cleanCircleText(str,textLimit) {
+    var retStr = str;
+    return retStr;
+}
+
 function buildExpGraphCircles(error, root) {
 
     if (error) throw error;
@@ -305,7 +378,7 @@ function buildExpGraphCircles(error, root) {
     expCgCircle = expCirclePackGraph.selectAll("circle")
         .data(nodes)
         .enter().append("circle")
-            .attr("class", function (d) {
+        .attr("class", function (d) {
             var classPrefix = d.parent ? d.children ? "node" : "node node--leaf" : "node node--root";
             var classSuffix = "";
             if (d && d.data && d.data.name) classSuffix =  " " + generateExpCgCircleExtendedClass(d.data.name);
@@ -347,6 +420,9 @@ function buildExpGraphCircles(error, root) {
         .enter()
         .append("text")
         .attr("class", "label")
+        .attr("r", function(d) {
+            return d.r;
+        })
         .style("fill-opacity", function (d) {
             return d.parent === root ? 1 : 0;
         })
@@ -355,15 +431,23 @@ function buildExpGraphCircles(error, root) {
         })
         .text(function (d) {
             if (typeof getExplorerCgCircleText === 'function') {
-                var circleText = cleanCircleText(getExplorerCgCircleText(d),EXP_CIRCLE_TEXT_LIMIT);
+                var circleText = getExplorerCgCircleText(d);
                 return circleText;
             }
             else return "UNDEFINED getFrameworkExpCgCircleText";
         })
+        .attr("name", function (d) {
+            if (typeof getExplorerCgCircleText === 'function') {
+                var circleText = getExplorerCgCircleText(d);
+                return circleText;
+            }
+            else return "UNDEFINED getFrameworkExpCgCircleText";
+        }).each(function(d) {
+            var text = d3.select(this);
+            getDisplayTitle(d, text);
+        });
 
-    ;
-
-    expCgNode = expCirclePackGraph.selectAll("circle,text");
+    expCgNode = expCirclePackGraph.selectAll("circle,text,wrap");
 
     expSvg
         .style("background", expCgColor(-1))

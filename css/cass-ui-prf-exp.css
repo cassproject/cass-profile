@@ -287,6 +287,15 @@ input:checked~.switch-paddle {
 
 /* ---- MISC ---- */
 
+#profileUserSearchContainer {
+    margin-top: 5%;
+}
+
+span.frameworkCategoryGraphSummaryName {
+    font-weight: 600;
+    font-size: 1.2rem !important;
+}
+
 .asrValdSource {
     font-weight: bold;
 }

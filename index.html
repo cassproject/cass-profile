@@ -207,6 +207,190 @@
     <!--END CONTENTS-->
 
     <!-- MODAL WINDOWS -->
+    <div class="smaller reveal" id="modal-competency-info" data-reveal>
+        <h3><i class="fa fa-info-circle" aria-hidden="true"></i> <span id="compDetCompName"></span></h3>
+        <p><span id="compDetCompDesc"></span></p>
+        <ul class="no-bullets leftOffset25">
+            <li><strong>Framework:</strong> <a><span id="compDetFrameworkName"></span></a></li>
+            <li><strong>Confidence:</strong> <span id="compDetConfidence"></span></li>
+            <li class="divider"></li>
+            <li><strong>Assertions:</strong>
+                <div id="compDetAsrContainer"></div>
+            </li>
+        </ul>
+        <button class="button" data-close>Close</button>
+        <button class="close-button" data-close aria-label="Close reveal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="tiny reveal" id="modal-assertion-details" data-reveal>
+        <h4><i class="fa fa-info-circle" aria-hidden="true"></i> Assertion</h4>
+        <ul class="no-bullets leftOffset25">
+            <li><strong>Source:</strong> <span id="asrDetSource"></span></li>
+            <li><strong>Subject:</strong> <span id="asrDetSubject"></span></li>
+            <li><strong>Holds:</strong> <span id="asrDetHolds"></span></li>
+            <li><strong>Framework:</strong> <span id="asrDetFrameworkContainer"></span></li>
+            <li><strong>Competency:</strong> <span id="asrDetCompetency"></span></li>
+            <li id="asrDetLvlLi"><strong>Level:</strong> <span id="asrDetLvl"></span></li>
+            <li><strong>Confidence:</strong> <span id="asrDetConf"></span></li>
+            <li class="divider"></li>
+            <li><strong>Date:</strong> <span id="asrDetEvDate"></span></li>
+            <li><strong>Expiration:</strong> <span id="asrDetEvExp"></span></li>
+            <li class="divider"></li>
+            <li><strong>Link:</strong> <span id="asrDetEvUrl"></span></li>
+            <li class="divider"></li>
+            <li id="asrDetEvLi"><strong>Evidence:</strong>
+                <ul id="asrDetEvList" class="fa-ul"></ul>
+            </li>
+        </ul>
+        <button class="button" data-close>Close</button>
+        <button class="close-button" data-close aria-label="Close reveal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="smaller reveal" id="modal-evidence-details" data-reveal>
+        <h4><i class="fa fa-info-circle" aria-hidden="true"></i> <span id="evDetEvName"></span></h4>
+        <ul class="no-bullets leftOffset25">
+            <li><strong>Source:</strong> <span id="evDetEvSource"></span></li>
+            <li><strong>Type:</strong> <span id="evDetEvType"></span></li>
+            <li class="divider"></li>
+            <li><strong>Link:</strong> <span id="evDetEvUrl"></span></li>
+            <li><strong>Assertion:</strong> <span id="evDetAsrId"></span></li>
+        </ul>
+        <div id="evDetPrevContainer"></div>
+        <button class="button" data-close>Close</button>
+        <button class="close-button" data-close aria-label="Close reveal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="tiny reveal" id="modal-validate-assertions" data-reveal>
+        <h4><i class="fa fa-handshake-o" aria-hidden="true"></i> Validate Claims</span></h4>
+        <div id="asrValdSetupCtr">
+            <p><span>Select the mechanisms with which to validate claims:</span></p>
+            <select multiple id="asrValdTypes" style="height: 4rem">
+                <option value="s">Claim Source</option>
+                <option value="b">CASS Blockchain</option>
+            </select>
+            <div class="callout warning small centerText">
+                <p><i class="fa fa-exclamation-triangle"></i>  This process can take several minutes.</p>
+            </div>
+            <div id="asrValdSetupBtnsCtr" class="grid-x">
+                <div class="cell">
+                    <button id="asrValdValdBtn" onclick="profileExpValidateAssertions();" class="button">Validate</button>
+                    &nbsp;&nbsp;
+                    <button data-close class="button secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div id="asrValdResultsCtr" style="display:none">
+            <p><strong>Validation Results:</strong></p>
+            <div id="asrValdResultsListContainer">
+                <ul id="asrValdResultsList" class="fa-ul"></ul>
+            </div>
+            <div class="grid-x">
+                <div class="cell medium-12">
+                    <button class="button" data-close>OK</button>
+                </div>
+            </div>
+        </div>
+        <div class="grid-x">
+            <div class="cell cassUiModalBusyCtr" style="display:none">
+                <div class="grid-container">
+                    <div class="grid-x grid-padding-x grid-padding-y">
+                        <div class="cell medium-12 text-center">
+                            <h5 class="cassUiModalBusyText"></h5>
+                            <img class="cassUiBusyImg" src="img/CASS-loading-64px.gif" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cell cassUiModalErrorCtr" style="display:none">
+                <div class="grid-container">
+                    <div class="grid-x grid-padding-x grid-padding-y">
+                        <div class="cell medium-12 text-center cassUiError">
+                            <h5><i class="fa fa-exclamation-triangle"></i> <span class="cassUiModalErrorText"></span></h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="close-button" data-close aria-label="Close reveal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="tiny reveal" id="modal-share-assertion" data-reveal>
+        <h4><i class="fa fa-share-alt-square" aria-hidden="true"></i> Share Claim</span></h4>
+        <p id="asrShareAssertionDesc"></p>
+        <p><span>To share a claim, it must be added to a portfolio.  Portfolios can then be shared with your contacts.</span></p>
+        <div id="asrShareCreatePortfolioContainer" style="display: none">
+            <input type="text" id="asrShareCreatePortfolioName" placeholder="Portfolio name">
+            <div class="grid-x">
+                <div class="cell">
+                    <button id="asrShareCreatePortfolioBtn" onclick="assertionShareCreatePortfolio();" class="button">Create Portfolio</button>
+                    &nbsp;&nbsp;
+                    <button id="asrShareCreatePortfolioCancelBtn" onclick="assertionShareCancelCreatePortfolio();" class="button secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div id="asrShareAssignPortfolioContainer" style="display: none">
+            <div id="asrShareAssignPortfolioListContainer">
+                <ul id="asrShareAssignPortfolioList" class="no-bullets leftOffset25"></ul>
+            </div>
+            <div class="grid-x">
+                <div class="cell medium-8">
+                    <button id="asrShareAssignPortfolioSaveBtn" onclick="assertionShareSave();" class="button">Save and Share</button>
+                    &nbsp;&nbsp;
+                    <button id="asrShareAssignPortfolioCancelBtn" class="button secondary" data-close>Cancel</button>
+                </div>
+                <div class="cell medium-4 rightText">
+                    <button id="asrShareAssignPortfolioNewPortfolioBtn" onclick="assertionShareNewPortfolio();" class="button"><i class="fa fa-plus-circle" aria-hidden="true"></i> New Portfolio</button>
+                </div>
+            </div>
+        </div>
+        <div id="asrSharePortfoliContactsContainer" style="display: none">
+            <h5 title="Assign portfolio contacts"><i class="fa fa-users" aria-hidden="true"></i> <span id="asrSharePortfoliContactsPortfolioName"></span></h5>
+            <div id="asrShareAssignPortfolioContactsListContainer">
+                <ul id="asrShareAssignPortfolioContactsList" class="no-bullets leftOffset25"></ul>
+            </div>
+            <div class="grid-x">
+                <div class="cell medium-12">
+                    <button id="asrSharePortfolioContactsApplyBtn" onclick="assertionShareApplyPortfolioContacts();" class="button">Assign</button>
+                    &nbsp;&nbsp;
+                    <button id="asrSharePortfolioContactsCancelBtn" onclick="assertionShareCancelPortfolioContactsAssignment();" class="button secondary">Cancel</button>
+                </div>
+            </div>
+            <input id="asrShareAssignPortfolioContactsPortfolioType" type="hidden">
+            <input id="asrShareAssignPortfolioContactsPortfolioTypeLookup" type="hidden">
+        </div>
+        <div class="grid-x">
+            <div class="cell cassUiModalBusyCtr" style="display:none">
+                <div class="grid-container">
+                    <div class="grid-x grid-padding-x grid-padding-y">
+                        <div class="cell medium-12 text-center">
+                            <h5 class="cassUiModalBusyText"></h5>
+                            <img class="cassUiBusyImg" src="img/CASS-loading-64px.gif" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cell cassUiModalErrorCtr" style="display:none">
+                <div class="grid-container">
+                    <div class="grid-x grid-padding-x grid-padding-y">
+                        <div class="cell medium-12 text-center cassUiError">
+                            <h5><i class="fa fa-exclamation-triangle"></i> <span class="cassUiModalErrorText"></span></h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="close-button" data-close aria-label="Close reveal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
     <!-- END MODAL WINDOWS -->
 
     <script src="js/vendor/jquery.js"></script>

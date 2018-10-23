@@ -2,12 +2,6 @@
 // CASS UI Profile Explorer Main Functions
 //**************************************************************************************************
 
-//TODO openFrameworkInFrameworkExplorer
-//TODO openProfileExpAssertionValidateModal
-//TODO showCompetencyDetailsModal
-//TODO showAssertionDetailsModal
-//TODO showEvidenceDetailsModal
-
 //TODO cleanFrameworkName expand on or get rid of
 //TODO generateEvidenceSource expand this
 //TODO loadPageContents At some point take loggedInPkPem check out and just start with setProfileUserAsLoggedInUserAndGo OR setUpForProfileUserSearch
@@ -21,11 +15,21 @@
 
 //TODO expandListViewToName think of something better than name
 
+//TODO addSourceAssertionsToCompetencyDetailsModal combine with addSourceAssertionsToGraphSidebar
+//TODO buildCompetencyDetailsModalEvidenceDiv combine with buildGraphSidebarEvidenceDiv
+
+//todo profileExpExecuteAssertionValidation define and implement
+
+//TODO Investigate MAX_ASSR_SEARCH_SIZE further
+
 //**************************************************************************************************
 // Constants
 
 //REMOVE SAMANTHA_SMITH_PK_PEM AND USAGES AT SOME POINT..ONLY FOR DEMO/DEV TO SAVE CLICKS
 const SAMANTHA_SMITH_PK_PEM = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAogp5B7hoYRwZDjCb4NL/fNt3xTBvDMw08jLTdOcmyKVzetHgwTWRf3ojl1+EPqpgnVRxp/zk2/AQhYelJaU6JmzPBvx14FjxB3ObbYckXrBw60fQ643geAIY3lQAYH7YpBsDp/xCQlMCw7L1H70ZnRPWdxzl9ee20ZeQy367biWPbFQCBUFWHN+gXH2pGZkM8n3/ql6hQ9SFaVEkqzIFdHwTenfl5LYrGmiUuzBy4xfwXsd0NZSzOjxuZyGlupEDkqTh7bMmGJSe13+BlbQcVJ+OwYHM+RdLfk3zXia1cMrcJx/nZZUFxxQs4+V51bBbTG0ms7K9/O28U6Q5BytzNQIDAQAB-----END PUBLIC KEY-----";
+
+//TODO Investigate MAX_ASSR_SEARCH_SIZE further
+const MAX_ASSR_SEARCH_SIZE = 10000;
 
 const PROFILE_DESCRIPTION_OWN = "The following areas of knowledge, skills, and abilities were determined for you based on all evidence currently available to CASS:";
 const PROFILE_DESCRIPTION_OTHER = "The following areas of knowledge, skills, and abilities were determined for this user based on all evidence currently available to CASS and visible to you:";
@@ -236,7 +240,7 @@ function buildFrameworkExplorerFrameworkHyperlinkListForCompetency(competencyId)
     var retHtml = "";
     for (var i = 0; i < fwa.length; i++) {
         var fw = fwa[i];
-        retHtml += "<a onclick=\"openFrameworkInFrameworkExplorer('" + fw.shortId() + "');\">" + escapeSingleQuote(fw.name) + "</a>"
+        retHtml += "<a onclick=\"openFrameworkExplorer('" + fw.shortId() + "');\">" + escapeSingleQuote(fw.name) + "</a>"
         if (i < (fwa.length - 1)) retHtml += ", ";
     }
     return retHtml;
@@ -388,75 +392,341 @@ function setUpForProfileUserSearch() {
     showProfileUserSearchContainer();
 }
 
-function openFrameworkInFrameworkExplorer(frameworkId) {
-    // loadLocalStorageWithCassProfileExpToFrameworkExpStuff();
-    // localStorage.setItem(LS_FRAMEWORK_TO_OPEN_KEY,frameworkId);
-    // window.open(FWK_EXP_LINK, '_blank');
-    // //alert("OPEN FRAMEWORK: " + frameworkId);
+function toDateString(dt) {
+    return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
 }
 
-function showCompetencyDetailsModal(compId) {
-    // var cpt = competencyPackTrackerMapById[compId];
-    // if (!cpt) return;
-    // var comp = cpt.cassNodePacket.getNodeList()[0];
-    // if (!comp) return;
-    // $(COMP_DTL_NAME).html(comp.getName().trim());
-    // $(COMP_DTL_DESC).html(comp.getDescription().trim());
-    // //$(COMP_DTL_FRM_NAME).html(buildCassEditorFrameworkHyperlinkListForCompetency(comp.id));
-    // $(COMP_DTL_FRM_NAME).html(buildFrameworkExplorerFrameworkHyperlinkListForCompetency(comp.id));
-    // var asArray = getAssertionsForCompetencyPackTracker(cpt);
-    // var conf = determineConfidenceForAssertions(asArray);
-    // $(COMP_DTL_CONF).html((conf * 100) + "%");
-    // buildAssertionListForCompetencyDetailsModal(asArray);
-    // $(COMP_DTL_MODAL).foundation('open');
-}
-
-function showAssertionDetailsModal(assertionId) {
-    // var as = assertionMap[assertionId];
-    // $(ASR_DTL_SOURCE).html(assertionSourceMap[assertionId]);
-    // $(ASR_DTL_SUBJECT).html(profileUserName);
-    // var compName = getCompetencyOrFrameworkName(as.competency);
-    // $(ASR_DTL_COMP).html(buildHyperlinkListForCompetency(as.competency));
-    // //$(ASR_DTL_FW_CTR).html(buildCassEditorFrameworkHyperlinkListForCompetency(as.competency));
-    // $(ASR_DTL_FW_CTR).html(buildFrameworkExplorerFrameworkHyperlinkListForCompetency(as.competency));
-    // buildAssertionDetailsLevel(as.level);
-    // buildAssertionDetailsHolds(assertionNegativeMap[assertionId]);
-    // $(ASR_DTL_CONF).html((as.confidence * 100) + "%");
-    // $(ASR_DTL_DATE).html(toDateString(new Date(as.getAssertionDate())));
-    // $(ASR_DTL_EXP).html(toDateString(new Date(as.getExpirationDate())));
-    // $(ASR_DTL_URL).html(generateAnchorLink(as.shortId(), "JSON", compName + " Assertion"));
-    // buildAssertionDetailsEvidenceList(as.shortId(), getEvidenceForAssertion(as));
-    // $(ASR_DTL_MODAL).foundation('open');
-}
-
-function showEvidenceDetailsModal(assertionId, evIdx) {
-    // if (!assertionEvidenceMap[assertionId] || !assertionEvidenceMap[assertionId][evIdx]) return;
-    // var ev = assertionEvidenceMap[assertionId][evIdx];
-    // $(EV_DTL_NAME).html(ev.name);
-    // $(EV_DTL_TYPE).html(ev.type);
-    // $(EV_DTL_SOURCE).html(ev.source);
-    // // $(EV_DTL_DATE).html(toDateString(new Date(ev.evDate)));
-    // // $(EV_DTL_EXP).html(toDateString(new Date(ev.expDate)));
-    // $(EV_DTL_URL).html(generateAnchorLink(ev.link, "Evidence", ev.name + " - Evidence Link"));
-    // $(EV_DTL_ASR_ID).html(generateEvidenceDetailsAssertionLinks(ev));
-    // buildEvidenceDetailsPreview(ev);
-    // $(EV_DTL_MODAL).foundation('open');
+function openFrameworkExplorer(frameworkId) {
+    sendInitFrameworkExplorerMessage(frameworkId);
 }
 
 //**************************************************************************************************
 // Validate Assertions Modal
 //**************************************************************************************************
 
-function openProfileExpAssertionValidateModal() {
-    // $(ASR_VALD_TYPES).val("");
-    // $(ASR_VALD_ERROR_CTR).hide();
-    // $(ASR_VALD_BUSY_CTR).hide();
-    // $(ASR_VALD_RESULTS_CTR).hide();
-    // $(ASR_VALD_SETUP_CTR).show();
-    // $(ASR_VALD_SETUP_BTN_CTR).show();
-    // $(ASR_VALD_MODAL).removeClass("small").addClass("tiny");
-    // $(ASR_VALD_MODAL).foundation('open');
+function isAssertionValidationTypeValid() {
+    var isValid = true;
+    var types = $(ASR_VALD_TYPES).val();
+    if (!types || types.length == 0) {
+        isValid = false;
+        $(ASR_VALD_ERROR_TEXT).html("You must select at least one type of validation");
+        $(ASR_VALD_ERROR_CTR).show();
+    }
+    return isValid;
 }
+
+function handleProfileExpAssertionValidationFailure(err) {
+    hideModalBusy(ASR_VALD_MODAL);
+    enableModalInputsAndButtons();
+    showModalError(ASR_VALD_MODAL,err);
+}
+
+function getTitleForAssertionValidity(asrValid) {
+    if (asrValid) return "Claim is valid";
+    else return "Claim is not valid";
+}
+
+function addSourceAssertionsToAssertionValidationResultsList(source, sourceAssertionArray) {
+    $(sourceAssertionArray).each(function (i, as) {
+        var isAsValid = assertionValidationResultsMap[as.shortId()];
+        var sourceAsLi = $("<li/>");
+        sourceAsLi.attr("title",getTitleForAssertionValidity(isAsValid));
+        var sourceAsDiv = $("<div/>");
+        sourceAsDiv.addClass("grid-x");
+        var sourceAsStatementDiv = $("<div/>");
+        sourceAsStatementDiv.addClass("cell medium-11");
+        var sourceAsStmtHtml = "<span class=\"asrValdSource\">" + source + "</span> claims subject ";
+        var isNegativeAssertion = assertionNegativeMap[as.shortId()];
+        if (isNegativeAssertion) sourceAsStmtHtml += "does not hold ";
+        else sourceAsStmtHtml += "holds ";
+        sourceAsStmtHtml += "<span class=\"asrValdComp\">" + getCompetencyOrFrameworkName(as.competency) + "</span>";
+        sourceAsStatementDiv.html(sourceAsStmtHtml);
+        var sourceAsValidDiv = $("<div/>");
+        sourceAsValidDiv.addClass("cell medium-1");
+        sourceAsValidDiv.html(buildAssertionValidIcon(as.shortId(),false));
+        sourceAsDiv.append(sourceAsStatementDiv);
+        sourceAsDiv.append(sourceAsValidDiv);
+        sourceAsLi.append(sourceAsDiv);
+        $(ASR_VALD_RESULTS_LIST).append(sourceAsLi);
+    });
+}
+
+function buildProfileExpAssertionValidationResultsList() {
+    $(ASR_VALD_RESULTS_LIST).empty();
+    var asrBySource = divideAssertionsBySource(assertionList);
+    for (var source in asrBySource) {
+        if (asrBySource.hasOwnProperty(source)) addSourceAssertionsToAssertionValidationResultsList(source, asrBySource[source]);
+    }
+}
+
+function addExpCgCircleInvalidClassForInvalidAssertions() {
+    for (var i=0;i<assertionList.length;i++) {
+        var as = assertionList[i];
+        var isAsValid = assertionValidationResultsMap[as.shortId()];
+        if (!isAsValid) {
+            var cgClass = generateExpCgCircleExtendedClass(as.competency);
+            $("." + cgClass).addClass("invalid");
+        }
+    }
+}
+
+function handleProfileExpAssertionValidationSuccess() {
+    //TODO make something up for now...
+    hideModalBusy(ASR_VALD_MODAL);
+    enableModalInputsAndButtons();
+    $(ASR_VALD_SETUP_CTR).hide();
+    buildProfileExpAssertionValidationResultsList();
+    $(ASR_VALD_MODAL).removeClass("tiny").addClass("small");
+    $(ASR_VALD_RESULTS_CTR).show();
+    //update the circe graph sidebar so it shows validation results icons...
+    if (lastExpCgSidebarD3NodeName != "") showCircleGraphSidebarDetails(lastExpCgSidebarD3NodeName);
+    //update the circle graph circle classes
+    removeAllExpCgCircleInvalidClasses();
+    addExpCgCircleInvalidClassForInvalidAssertions();
+}
+
+function buildAssertionValidationResultsMap() {
+    assertionValidationResultsMap = {};
+    for (var i=0;i<assertionList.length;i++) {
+        var result = true;
+        if (i%4 == 0) result = false;
+        assertionValidationResultsMap[assertionList[i].shortId()] = result;
+    }
+}
+
+//todo profileExpExecuteAssertionValidation define and implement
+function profileExpExecuteAssertionValidation() {
+    buildAssertionValidationResultsMap();
+    setTimeout(function () {
+        handleProfileExpAssertionValidationSuccess();
+    }, 3000);
+}
+
+function profileExpValidateAssertions() {
+    $(ASR_VALD_ERROR_CTR).hide();
+    if (isAssertionValidationTypeValid()) {
+        $(ASR_VALD_SETUP_BTN_CTR).hide();
+        showModalBusy(ASR_VALD_MODAL,"Validating claims...");
+        disableModalInputsAndButtons();
+        profileExpExecuteAssertionValidation();
+    }
+}
+
+function openProfileExpAssertionValidateModal() {
+    $(ASR_VALD_TYPES).val("");
+    hideModalBusy(ASR_VALD_MODAL);
+    hideModalError(ASR_VALD_MODAL);
+    enableModalInputsAndButtons();
+    $(ASR_VALD_RESULTS_CTR).hide();
+    $(ASR_VALD_SETUP_CTR).show();
+    $(ASR_VALD_SETUP_BTN_CTR).show();
+    $(ASR_VALD_MODAL).removeClass("small").addClass("tiny");
+    $(ASR_VALD_MODAL).foundation('open');
+}
+
+//**************************************************************************************************
+// Assertion Details Modal
+//**************************************************************************************************
+
+function buildAssertionDetailsLevel(level) {
+    if (!level || level == null) $(ASR_DTL_LVL_LI).hide();
+    else {
+        $(ASR_DTL_LVL_LI).show();
+        $(ASR_DTL_LVL).html(level);
+    }
+}
+
+function buildAssertionDetailsHolds(negative) {
+    var holdsHtml = "";
+    if (negative) {
+        $(ASR_DTL_HOLDS).attr("class", "asrNotHolds");
+        holdsHtml += "<i class=\"fa fa-times\" aria-hidden=\"true\"></i>";
+    } else {
+        $(ASR_DTL_HOLDS).attr("class", "asrHolds");
+        holdsHtml += "<i class=\"fa fa-check\" aria-hidden=\"true\"></i>";
+    }
+    $(ASR_DTL_HOLDS).html(holdsHtml);
+}
+
+function addEvidenceLineToAssertionDetailsEvidenceList(assertionId, ev) {
+    var evLi = $("<li/>");
+    var evLiHtml = "<a title=\"Show " + ev.type.toLowerCase() + " details\" onclick=\"showEvidenceDetailsModal('" + assertionId + "','" + ev.evIdx + "')\">";
+    evLiHtml += "<i class=\"fa " + getEvidenceTypeFAClass(ev.type) + "\" aria-hidden=\"true\"></i>&nbsp;";
+    evLiHtml += ev.name + "</a>";
+    evLi.html(evLiHtml);
+    $(ASR_DTL_EV_LIST).append(evLi);
+}
+
+function buildAssertionDetailsEvidenceList(assertionId, evArray) {
+    $(ASR_DTL_EV_LIST).empty();
+    if (!evArray || evArray == null || evArray.length == 0) $(ASR_DTL_EV_LI).hide();
+    else {
+        $(ASR_DTL_EV_LI).show();
+        $(evArray).each(function (i, ev) {
+            addEvidenceLineToAssertionDetailsEvidenceList(assertionId, ev);
+        });
+    }
+}
+
+function showAssertionDetailsModal(assertionId) {
+    var as = assertionMap[assertionId];
+    $(ASR_DTL_SOURCE).html(assertionSourceMap[assertionId]);
+    $(ASR_DTL_SUBJECT).html(profileUserName);
+    var compName = getCompetencyOrFrameworkName(as.competency);
+    $(ASR_DTL_COMP).html(buildHyperlinkListForCompetency(as.competency));
+    $(ASR_DTL_FW_CTR).html(buildFrameworkExplorerFrameworkHyperlinkListForCompetency(as.competency));
+    buildAssertionDetailsLevel(as.level);
+    buildAssertionDetailsHolds(assertionNegativeMap[assertionId]);
+    $(ASR_DTL_CONF).html((as.confidence * 100) + "%");
+    $(ASR_DTL_DATE).html(toDateString(new Date(as.getAssertionDate())));
+    $(ASR_DTL_EXP).html(toDateString(new Date(as.getExpirationDate())));
+    $(ASR_DTL_URL).html(generateAnchorLink(as.shortId(), "JSON", compName + " Assertion"));
+    buildAssertionDetailsEvidenceList(as.shortId(), getEvidenceForAssertion(as));
+    $(ASR_DTL_MODAL).foundation('open');
+}
+
+
+//**************************************************************************************************
+// Evidence Details Modal
+//**************************************************************************************************
+
+function getEvidenceLinkType(evLink) {
+    if (evLink.indexOf(".jpg") >= 0) return "image";
+    else if (evLink.indexOf(".jpeg") >= 0) return "image";
+    else if (evLink.indexOf(".gif") >= 0) return "image";
+    else if (evLink.indexOf(".png") >= 0) return "image";
+    else if (evLink.indexOf(".pdf") >= 0) return "pdf";
+    else if (evLink.indexOf(".html") >= 0) return "html";
+    else return null;
+}
+
+function buildEvidenceDetailsImagePreview(ev) {
+    var imgDiv = $("<div/>");
+    var imgHtml = "<img id=\"imagePreviewObj\" src=\"" + ev.link + "\"></img>";
+    imgDiv.html(imgHtml);
+    $(EV_DTL_PRV_CTR).append(imgDiv);
+}
+
+function buildEvidenceDetailsHtmlPreview(ev) {
+    var htmlDiv = $("<div/>");
+    var htmlHtml = "<object id=\"htmlPreviewObj\" data=\"" + ev.link + "\" type=\"text/html\"></object>";
+    htmlDiv.html(htmlHtml);
+    $(EV_DTL_PRV_CTR).append(htmlDiv);
+}
+
+function buildEvidenceDetailsPdfPreview(ev) {
+    var pdfDiv = $("<div/>");
+    var pdfHtml = "<object id=\"pdfPreviewObj\" data=\"" + ev.link + "\" type=\"application/pdf\"></object>";
+    pdfDiv.html(pdfHtml);
+    $(EV_DTL_PRV_CTR).append(pdfDiv);
+}
+
+function buildEvidenceDetailsPreview(ev) {
+    $(EV_DTL_PRV_CTR).empty();
+    var evLinkType = (getEvidenceLinkType(ev.link));
+    if (evLinkType != null) {
+        if (evLinkType == "image") buildEvidenceDetailsImagePreview(ev);
+        else if (evLinkType == "pdf") buildEvidenceDetailsPdfPreview(ev);
+        else if (evLinkType == "html") buildEvidenceDetailsHtmlPreview(ev);
+    }
+}
+
+function generateEvidenceDetailsAssertionLinks(ev) {
+    var asrLinks = "<a onclick=\"showAssertionDetailsModal('" + ev.assertionId + "')\">Details</a>";
+    asrLinks += ", " + generateAnchorLink(ev.assertionId, "JSON", ev.name + " - Evidence Assertion");
+    return asrLinks;
+}
+
+function showEvidenceDetailsModal(assertionId, evIdx) {
+    if (!assertionEvidenceMap[assertionId] || !assertionEvidenceMap[assertionId][evIdx]) return;
+    var ev = assertionEvidenceMap[assertionId][evIdx];
+    $(EV_DTL_NAME).html(ev.name);
+    $(EV_DTL_TYPE).html(ev.type);
+    $(EV_DTL_SOURCE).html(ev.source);
+    $(EV_DTL_URL).html(generateAnchorLink(ev.link, "Evidence", ev.name + " - Evidence Link"));
+    $(EV_DTL_ASR_ID).html(generateEvidenceDetailsAssertionLinks(ev));
+    buildEvidenceDetailsPreview(ev);
+    $(EV_DTL_MODAL).foundation('open');
+}
+
+//**************************************************************************************************
+// Competency Details Modal
+//**************************************************************************************************
+
+//TODO buildCompetencyDetailsModalEvidenceDiv combine with buildGraphSidebarEvidenceDiv
+function buildCompetencyDetailsModalEvidenceDiv(evDivId, as, evArray) {
+    var evDiv = $("<div/>");
+    evDiv.addClass("cdmAsrEvDiv");
+    evDiv.attr("id", evDivId);
+    evDiv.attr("style", "display:none");
+    var evUl = $("<ul/>");
+    $(evArray).each(function (i, ev) {
+        var evLi = $("<li/>");
+        var evLiHtml = "<a title=\"Show " + ev.type.toLowerCase() + " details\" onclick=\"showEvidenceDetailsModal('" + as.shortId() + "','" + ev.evIdx + "')\">";
+        evLiHtml += "<i class=\"fa " + getEvidenceTypeFAClass(ev.type) + "\" aria-hidden=\"true\"></i>&nbsp;";
+        evLiHtml += ev.name + "</a>";
+        evLi.html(evLiHtml);
+        evUl.append(evLi);
+    });
+    evDiv.append(evUl);
+    return evDiv;
+}
+
+//TODO addSourceAssertionsToCompetencyDetailsModal combine with addSourceAssertionsToGraphSidebar
+function addSourceAssertionsToCompetencyDetailsModal(sourceName, sourceAssertionArray) {
+    $(COMP_DTL_ASR_CTR).append("<span class=\"cdmAsrSource\">" + sourceName + "</span>")
+    var sourceUl = $("<ul/>");
+    $(sourceAssertionArray).each(function (i, as) {
+        var sourceAsLi = $("<li/>");
+        sourceAsLi.addClass("cdmAsrText");
+        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">...claims subject ";
+        var isNegativeAssertion = assertionNegativeMap[as.shortId()];
+        if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
+        else sourceAsLiHtml += "holds ";
+        sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
+        sourceAsLiHtml += buildConfidenceIcon(as.confidence);
+        sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
+        sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
+        var evArray = getEvidenceForAssertion(as);
+        var evDiv = null;
+        if (evArray && evArray.length > 0) {
+            var evDivId = buildIDableString(as.shortId() + "_evdiv_cdm");
+            sourceAsLiHtml += "&nbsp;&nbsp;<a onclick=\"$('#" + evDivId + "').toggle();toggleEvDivInd($(this));\" " +
+                "title=\"View evidence\" class=\"button tiny evidIndToggle\">" + evArray.length +
+                "&nbsp;&nbsp;<i class=\"fa fa-chevron-right\"></i></a>";
+            evDiv = buildCompetencyDetailsModalEvidenceDiv(evDivId, as, evArray);
+        }
+        sourceAsLi.html(sourceAsLiHtml);
+        if (evDiv != null) sourceAsLi.append(evDiv);
+        sourceUl.append(sourceAsLi);
+    });
+    $(COMP_DTL_ASR_CTR).append(sourceUl);
+}
+
+function buildAssertionListForCompetencyDetailsModal(asArray) {
+    $(COMP_DTL_ASR_CTR).empty();
+    if (!asArray || asArray == null || asArray.length == 0) return;
+    var asrBySource = divideAssertionsBySource(asArray);
+    for (var source in asrBySource) {
+        if (asrBySource.hasOwnProperty(source)) addSourceAssertionsToCompetencyDetailsModal(source, asrBySource[source]);
+    }
+}
+
+function showCompetencyDetailsModal(compId) {
+    var cpd = profileCompetencyData.competencyPacketDataMap[compId];
+    if (!cpd) return;
+    var comp = cpd.cassNodePacket.getNodeList()[0];
+    if (!comp) return;
+    $(COMP_DTL_NAME).html(comp.getName().trim());
+    $(COMP_DTL_DESC).html(comp.getDescription().trim());
+    $(COMP_DTL_FRM_NAME).html(buildFrameworkExplorerFrameworkHyperlinkListForCompetency(comp.id));
+    var asArray = getAssertionsForCompetencyPacketData(cpd);
+    var conf = determineConfidenceForAssertions(asArray);
+    $(COMP_DTL_CONF).html((conf * 100) + "%");
+    buildAssertionListForCompetencyDetailsModal(asArray);
+    $(COMP_DTL_MODAL).foundation('open');
+}
+
 
 //**************************************************************************************************
 // Assertion Envelopes/Grouping/Portfolio
@@ -520,8 +790,8 @@ function generateAssertionDescriptionSimpleHtml(assertionShortId) {
 }
 
 function assertionShareCancelCreatePortfolio() {
-    $(ASR_SHARE_ERROR_CTR).hide();
-    $(ASR_SHARE_BUSY_CTR).hide();
+    hideModalError(ASR_SHARE_MODAL);
+    hideModalBusy(ASR_SHARE_MODAL);
     if (assertionEnvelopeList.length == 0 && newAssertionShareEnvelopeList.length == 0) {
         $(ASR_SHARE_MODAL).foundation('close');
     }
@@ -648,15 +918,13 @@ function initAssertionShareEnvelopeTracker(assertionShortId) {
 }
 
 function showAssertionShareAsBusy(busyMsg) {
-    $(ASR_SHARE_ERROR_CTR).hide();
-    $(ASR_SHARE_BYS_TEXT).html(busyMsg);
-    $(ASR_SHARE_BUSY_CTR).show();
+    hideModalError(ASR_SHARE_MODAL);
+    showModalBusy(ASR_SHARE_MODAL,busyMsg);
 }
 
 function showAssertionShareError(errMsg) {
-    $(ASR_SHARE_BUSY_CTR).hide();
-    $(ASR_SHARE_ERROR_TEXT).html(errMsg);
-    $(ASR_SHARE_ERROR_CTR).show();
+    hideModalBusy(ASR_SHARE_MODAL);
+    showModalError(ASR_SHARE_MODAL,errMsg);
 }
 
 function assertionShareNewPortfolio() {
@@ -702,7 +970,7 @@ function assertionShareCreatePortfolio() {
         var checkBoxId = ASR_SHARE_NEW_AE_CB_ID_PREFIX + newIdx;
         var checked = nase.assigned;
         $(ASR_SHARE_ASSIGN_PRTF_LIST).append(buildAssertionSharePortfolioListLineItem(newPrtName, checkBoxId, checked,null,newIdx));
-        $(ASR_SHARE_ERROR_CTR).hide();
+        hideModalError(ASR_SHARE_MODAL);
         $(ASR_SHARE_CREATE_PRTF_CTR).hide();
         $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
     }
@@ -719,9 +987,8 @@ function getNumberOfAssertionEnvelopesToSave() {
 }
 
 function handleSynchAssertionEnvelopesFromAssertionShareFailure(failMsg) {
-    displayAppError("rebuildAssertionEnvelopeDataFromAssertionShareFailure: " + failMsg);
-    showProfileDisplayAsError("rebuildAssertionEnvelopeDataFromAssertionShareFailure: " + failMsg);
-    $(ASR_SHARE_BUSY_CTR).hide();
+    showPageError("rebuildAssertionEnvelopeDataFromAssertionShareFailure: " + failMsg);
+    hideModalBusy(ASR_SHARE_MODAL);
     $(ASR_SHARE_MODAL).foundation('close');
 }
 
@@ -737,7 +1004,7 @@ function handleSynchAssertionEnvelopesFromAssertionShareSuccess(ecRldArray) {
             return a.name.localeCompare(b.name);
         });
     }
-    $(ASR_SHARE_BUSY_CTR).hide();
+    hideModalBusy(ASR_SHARE_MODAL);
     $(ASR_SHARE_MODAL).foundation('close');
 }
 
@@ -747,7 +1014,8 @@ function synchAssertionEnvelopesFromAssertionShare() {
     assertionEnvelopeMap = {};
     assertionAssertionEnvelopeMap = {};
     assertionEnvelopeAssertionMap = {};
-    repo.search(new AssertionEnvelope().getSearchStringByType(),null,handleSynchAssertionEnvelopesFromAssertionShareSuccess,handleSynchAssertionEnvelopesFromAssertionShareFailure);
+    //repo.search(new AssertionEnvelope().getSearchStringByType(),null,handleSynchAssertionEnvelopesFromAssertionShareSuccess,handleSynchAssertionEnvelopesFromAssertionShareFailure);
+    repo.searchWithParams(new AssertionEnvelope().getSearchStringByType(),{'size':MAX_ASSR_SEARCH_SIZE},null,handleSynchAssertionEnvelopesFromAssertionShareSuccess,handleSynchAssertionEnvelopesFromAssertionShareFailure);
 }
 
 function checkAssertionEnvelopeSaveFromAssertionShareComplete() {
@@ -804,8 +1072,8 @@ function removeAssertionFromAssertionEnvelope(assertionShortId,assertionEnvelope
 }
 
 function assertionShareCancelPortfolioContactsAssignment() {
-    $(ASR_SHARE_ERROR_CTR).hide();
-    $(ASR_SHARE_BUSY_CTR).hide();
+    hideModalError(ASR_SHARE_MODAL);
+    hideModalBusy(ASR_SHARE_MODAL);
     $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
     $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
 }
@@ -848,8 +1116,8 @@ function assertionShareApplyPortfolioContacts() {
         var naseIdx = $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val();
         assertionShareApplyPortfolioContactsForNaseIdx(naseIdx);
     }
-    $(ASR_SHARE_ERROR_CTR).hide();
-    $(ASR_SHARE_BUSY_CTR).hide();
+    hideModalError(ASR_SHARE_MODAL);
+    hideModalBusy(ASR_SHARE_MODAL);
     $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
     $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
 }
@@ -899,8 +1167,8 @@ function managePortfolioContactsForAssertionShare(aesi,naseIdx) {
     if ((!aesi || aesi == null) && (!naseIdx && naseIdx == null)) return;
     addPortfolioNameForMangePortfolioContactsAssertionShare(aesi,naseIdx);
     buildContactListForMangePortfolioContactsAssertionShare(aesi,naseIdx);
-    $(ASR_SHARE_ERROR_CTR).hide();
-    $(ASR_SHARE_BUSY_CTR).hide();
+    hideModalError(ASR_SHARE_MODAL);
+    hideModalBusy(ASR_SHARE_MODAL);
     $(ASR_SHARE_ASSIGN_PRTF_CTR).hide();
     $(ASR_SHARE_PRTF_CONTACTS_CTR).show();
 }
@@ -982,7 +1250,7 @@ function saveEnvelopesForAssertionShare() {
     createNewEnvelopesForAssertionShare();
     if (getNumberOfAssertionEnvelopesToSave() > 0) saveModifiedAssertionEnvelopesFromAssertionShare();
     else {
-        $(ASR_SHARE_BUSY_CTR).hide();
+        hideModalBusy(ASR_SHARE_MODAL);
         $(ASR_SHARE_MODAL).foundation('close');
     }
 }
@@ -1013,8 +1281,9 @@ function assertionShareSave() {
 }
 
 function shareAssertion(assertionShortId) {
-    $(ASR_SHARE_ERROR_CTR).hide();
-    $(ASR_SHARE_BUSY_CTR).hide();
+    hideModalError(ASR_SHARE_MODAL);
+    hideModalBusy(ASR_SHARE_MODAL);
+    enableModalInputsAndButtons();
     $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
     $(ASR_SHARE_CREATE_PRTF_NAME).val("");
     newAssertionShareEnvelopeList = [];
