@@ -9,6 +9,10 @@ body {
 
 /* ---- UTILITY ---- */
 
+tspan {
+    pointer-events: none;
+}
+
 .reveal.smaller {
     width: 40%;
     max-width: 62.5rem;
