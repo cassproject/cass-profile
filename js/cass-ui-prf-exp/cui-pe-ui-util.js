@@ -370,6 +370,7 @@ function hideProfileUserSearchContainer() {
 }
 
 function showProfileUserSearchContainer() {
+    hideMainMenu();
     $(CASSUI_MAIN_BUSY_CTR).hide();
     $(CASSUI_MAIN_ERR_CTR).hide();
     $(PROF_NO_ASRS_CTR).hide();
