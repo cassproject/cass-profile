@@ -31,8 +31,8 @@ const SAMANTHA_SMITH_PK_PEM = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQE
 //TODO Investigate MAX_ASSR_SEARCH_SIZE further
 const MAX_ASSR_SEARCH_SIZE = 10000;
 
-const PROFILE_DESCRIPTION_OWN = "The following areas of knowledge, skills, and abilities were determined for you based on all evidence currently available to CASS:";
-const PROFILE_DESCRIPTION_OTHER = "The following areas of knowledge, skills, and abilities were determined for this user based on all evidence currently available to CASS and visible to you:";
+const PROFILE_DESCRIPTION_OWN = "The following areas of knowledge, skills, and abilities were determined for you based on all evidence currently available to CaSS:";
+const PROFILE_DESCRIPTION_OTHER = "The following areas of knowledge, skills, and abilities were determined for this user based on all evidence currently available to CaSS and visible to you:";
 
 const CREATE_IMPLIED_RELATIONS = true;
 
