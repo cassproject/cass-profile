@@ -2194,7 +2194,8 @@ function handleGetAssertionEnvelopesFailure(failMsg) {
 
 function fetchAssertionEnvelopes() {
     showPageAsBusy("Fetching portfolios...");
-    repo.search(new AssertionEnvelope().getSearchStringByType(),null,handleGetAssertionEnvelopesSuccess,handleGetAssertionEnvelopesFailure);
+    //repo.search(new AssertionEnvelope().getSearchStringByType(),null,handleGetAssertionEnvelopesSuccess,handleGetAssertionEnvelopesFailure);
+    repo.searchWithParams(new AssertionEnvelope().getSearchStringByType(),{'size':MAX_ASSR_SEARCH_SIZE},null,handleGetAssertionEnvelopesSuccess,handleGetAssertionEnvelopesFailure);
 }
 
 function handleGetAssertionsSuccess(arrayOfEcAssertions) {
@@ -2225,7 +2226,7 @@ function fetchAssertions() {
     assertionAssertionEnvelopeMap = {};
     assertionEnvelopeAssertionMap = {};
     lastExpCgSidebarD3NodeName = "";
-    EcAssertion.search(repo, getAssertionSearchQueryForProfileUser(), handleGetAssertionsSuccess, handleGetAssertionsFailure, null);
+    EcAssertion.search(repo, getAssertionSearchQueryForProfileUser(), handleGetAssertionsSuccess, handleGetAssertionsFailure, {'size':MAX_ASSR_SEARCH_SIZE});
 }
 
 function setUpProfileUserAndFetchAssertions(puName, puPem) {
