@@ -22,6 +22,10 @@
 
 //TODO Investigate MAX_ASSR_SEARCH_SIZE further
 
+//TODO getConfidenceInAssertionSource expand on this
+
+//TODO buildConfidenceExplanation check if a single claim is negative
+
 //**************************************************************************************************
 // Constants
 
@@ -301,12 +305,6 @@ function buildConfidenceTitle(confidence) {
     return "Confidence: " + (confidence * 100) + "%";
 }
 
-function setUpCompetencyConfidenceView(confidence, iconId) {
-    $(iconId).attr("class", CONF_CLASS_BASE);
-    $(iconId).attr("title", buildConfidenceTitle(confidence));
-    $(iconId).addClass(getConfidenceClass(confidence));
-}
-
 function divideAssertionsBySource(asArray) {
     var asBySource = {};
     for (var i = 0; i < asArray.length; i++) {
@@ -318,6 +316,13 @@ function divideAssertionsBySource(asArray) {
         asBySource[source].push(as);
     }
     return asBySource;
+}
+
+function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
+    $(iconId).attr("class", CONF_CLASS_BASE);
+    $(iconId).attr("title", buildConfidenceTitle(confidence));
+    $(iconId).attr("onclick","openConfidenceDetailsModal('" + escapeSingleQuote(cpdId) + "')");
+    $(iconId).addClass(getConfidenceClass(confidence));
 }
 
 function buildConfidenceIcon(conf) {
@@ -396,8 +401,114 @@ function toDateString(dt) {
     return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
 }
 
+//TODO getConfidenceInAssertionSource expand on this
+function getConfidenceInAssertionSource(asr) {
+    return 1;
+}
+
 function openFrameworkExplorer(frameworkId) {
     sendInitFrameworkExplorerMessage(frameworkId);
+}
+
+function confidenceToPercentage(conf) {
+    if (conf) {
+        var nconf = conf * 100;
+        return nconf + "%";
+    }
+    return "n/a";
+}
+
+//**************************************************************************************************
+// Confidence Details Modal
+//**************************************************************************************************
+function getHoldsNotHoldsConfDetailClass(isNegativeAssertion) {
+    if (isNegativeAssertion) return "asrNotHolds";
+    else return "asrHolds";
+}
+
+function addSourceAssertionsToConfidenceDetailList(source,sourceAssertionArray,confTracker) {
+    $(sourceAssertionArray).each(function (i, as) {
+        confTracker["totalNumberAsr"]++;
+        var sourceAsStmtHtml;
+        var confInAsrSource = getConfidenceInAssertionSource(source);
+        var totalAsrConf = as.confidence * confInAsrSource;
+        var isNegativeAssertion = assertionNegativeMap[as.shortId()];
+        if (isNegativeAssertion) {
+            sourceAsStmtHtml = "does not hold ";
+            confTracker["totalNegConf"] += totalAsrConf;
+        }
+        else {
+            sourceAsStmtHtml = "holds ";
+            confTracker["totalPosConf"] += totalAsrConf;
+        }
+        sourceAsStmtHtml += getCompetencyOrFrameworkName(as.competency);
+        var asLi = $("<li/>");
+        var asLiDiv = $("<div>");
+        asLiDiv.addClass("grid-x");
+        var asLiDivHtml = "<div class=\"cell medium-3\"><span class=\"confDetailListItem\">" + source + "</span></div>";
+        asLiDivHtml += "<div class=\"cell medium-3\"><span class=\"confDetailListItem " + getHoldsNotHoldsConfDetailClass(isNegativeAssertion) + "\">" +
+                        sourceAsStmtHtml + "</span></div>";
+        asLiDivHtml += "<div class=\"cell medium-2\"><span class=\"confDetailListItem\">" + confidenceToPercentage(as.confidence) + "</span></div>";
+        asLiDivHtml += "<div class=\"cell medium-2\"><span class=\"confDetailListItem\">" + confidenceToPercentage(confInAsrSource) + "</span></div>";
+        asLiDivHtml += "<div class=\"cell medium-2\"><span class=\"confDetailListItem\">" + confidenceToPercentage(totalAsrConf) + "</span></div>";
+        asLiDiv.html(asLiDivHtml);
+        asLi.append(asLiDiv);
+        $(CONF_DTL_ASR_LIST).append(asLi);
+    });
+}
+
+function buildConfidenceTracker() {
+    var confTracker = {};
+    confTracker["totalPosConf"] = 0;
+    confTracker["totalNegConf"] = 0;
+    confTracker["totalNumberAsr"] = 0;
+    return confTracker;
+}
+
+//TODO buildConfidenceExplanation check if a single claim is negative
+function buildConfidenceExplanation(confTracker,conf) {
+    var dtlHtml;
+    if (confTracker["totalNumberAsr"] == 1) {
+        dtlHtml = "One claim has been made with a total confidence of <span class=\"confDetailListHdr\">" + confidenceToPercentage(conf) + "</span>";
+    }
+    else {
+        dtlHtml = "Total confidence of positive claims <span class=\"asrHolds\">(" + confTracker["totalPosConf"]  + ")</span> " +
+                  "minus the total confidence of negative claims <span class=\"asrNotHolds\">(" + confTracker["totalNegConf"]  + ")</span> " +
+                  "divided by the total number of claims (" + confTracker["totalNumberAsr"] + ") = " +
+                  "<span class=\"confDetailListHdr\">" + conf + " OR " + confidenceToPercentage(conf)  + "</span>" ;
+    }
+    $(CONF_DTL_EXP).html(dtlHtml);
+}
+
+function buildConfidenceDetails(cpd) {
+    var confTracker = buildConfidenceTracker();
+    $(CONF_DTL_ASR_LIST).empty();
+    var asArray = getAssertionsForCompetencyPacketData(cpd);
+    var conf = determineConfidenceForAssertions(asArray);
+    $(CONF_DTL_CONF).html(confidenceToPercentage(conf));
+    var asrBySource = divideAssertionsBySource(asArray);
+    for (var source in asrBySource) {
+        if (asrBySource.hasOwnProperty(source)) addSourceAssertionsToConfidenceDetailList(source, asrBySource[source],confTracker);
+    }
+    buildConfidenceExplanation(confTracker,conf);
+}
+
+function openConfidenceDetailsModal(cpdId) {
+    hideModalBusy(CONF_DTL_MODAL);
+    hideModalError(CONF_DTL_MODAL);
+    enableModalInputsAndButtons();
+    var cpd;
+    if (cpdId) {
+        cpd = profileCompetencyData.competencyPacketDataMap[cpdId.trim()];
+        if (cpd) {
+            $(CONF_DTL_COMP_NAME).html(cpd.name);
+            buildConfidenceDetails(cpd);
+            $(CONF_DTL_MODAL).foundation('open');
+        }
+        else {
+            debugMessage("openConfidenceDetailsModal could not determine competency packet data for: " + cpdId);
+        }
+    }
 }
 
 //**************************************************************************************************
@@ -502,7 +613,7 @@ function profileExpExecuteAssertionValidation() {
 }
 
 function profileExpValidateAssertions() {
-    $(ASR_VALD_ERROR_CTR).hide();
+    hideModalError(ASR_VALD_MODAL);
     if (isAssertionValidationTypeValid()) {
         $(ASR_VALD_SETUP_BTN_CTR).hide();
         showModalBusy(ASR_VALD_MODAL,"Validating claims...");
@@ -1388,7 +1499,8 @@ function generateCompetencyLineItemHtmlForListView(cpd, comp, frameworkName, has
     var asArray = getAssertionsForCompetencyPacketData(cpd);
     var conf = determineConfidenceForAssertions(asArray);
     var liHtml = "<span class=\"competency-type\">" +
-        "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i>" +
+        "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" +
+        "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i></a>" +
         "&nbsp;&nbsp;&nbsp;" +
         "<a onclick=\"showCompetencyDetailsModal('" + escapeSingleQuote(comp.getId().trim()) + "');\">" +
         "<i class=\"fa fa-info-circle\" title=\"Show more details\" aria-hidden=\"true\"></i></a></span>" +
@@ -1569,7 +1681,7 @@ function showCompetencyGraphSidebarSingleNodePacketDetails(cpd) {
     evidenceTrail = [];
     var asArray = getAssertionsForCompetencyPacketData(cpd);
     var conf = determineConfidenceForAssertions(asArray);
-    setUpCompetencyConfidenceView(conf, CIR_FCS_DTL_COMP_CONF);
+    setUpCompetencyConfidenceView(conf, CIR_FCS_DTL_COMP_CONF, cpd.id);
     buildCompetencyGraphSidebarAssertionList(asArray);
     buildCompetencyGraphSidebarRelatedList(profileCompetencyData.competencyD3NodeTrackerMap[cpd.id].d3Node);
     showCircleSidebarDetails();

@@ -149,10 +149,15 @@ const ASR_VALD_TYPES = "#asrValdTypes";
 const ASR_VALD_SETUP_CTR = "#asrValdSetupCtr";
 const ASR_VALD_SETUP_BTN_CTR = "#asrValdSetupBtnsCtr";
 const ASR_VALD_RESULTS_CTR = "#asrValdResultsCtr";
-const ASR_VALD_ERROR_CTR = "#asrValdErrorCtr";
-const ASR_VALD_ERROR_TEXT = "#asrValdErrorText";
 const ASR_VALD_RESULTS_LIST_CTR = "#asrValdResultsListContainer";
 const ASR_VALD_RESULTS_LIST = "#asrValdResultsList";
+
+// Confidence Details Modal
+const CONF_DTL_MODAL = "#modal-competency-confidence-info";
+const CONF_DTL_COMP_NAME = "#confDetailCompName";
+const CONF_DTL_CONF = "#confDetailConf";
+const CONF_DTL_EXP = "#confDetailExplanation";
+const CONF_DTL_ASR_LIST = "#confDetailList";
 
 
 //**************************************************************************************************

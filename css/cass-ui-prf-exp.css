@@ -291,6 +291,50 @@ input:checked~.switch-paddle {
 
 /* ---- MISC ---- */
 
+#confDetailExplanationCtr {
+    padding: .5rem .8rem 0;
+    margin-bottom: 1rem;
+    border: 1px #999 solid;
+    border-radius: 10px;
+    background-color:#137499;
+}
+
+.confDetailDesc {
+    font-style: italic;
+    color:#999;
+}
+
+.confDetailExp {
+    font-style: italic;
+    color:#000;
+}
+
+.confDetailListCtr {
+    margin: 0px 15px 10px !important;
+}
+
+#confDetailConf,
+.confDetailListHdr {
+    font-weight: bold;
+    color: #137499;
+}
+
+.confDetailListHdr {
+    font-size:.9rem;
+}
+
+.confDetailListItem {
+    font-size:.8rem;
+}
+
+.asrHolds {
+    color: #009933;
+}
+
+.asrNotHolds {
+    color: #cc2900;
+}
+
 #profileUserSearchContainer {
     margin-top: 5%;
 }
@@ -530,14 +574,6 @@ span.frameworkCategoryGraphSummaryName {
 
 #circleFocusDetailsRelList a:hover {
     color: rgb(17,116,154); !important;
-}
-
-.asrHolds {
-    color: #009933;
-}
-
-.asrNotHolds {
-    color: #cc2900;
 }
 
 .highConf {

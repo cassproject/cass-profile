@@ -169,7 +169,7 @@
                                         <h3 id="circleFocusDetailsSingleName"></h3>
                                     </div>
                                     <div id="circleFocusCompTools" class="cell medium-2">
-                                        <i id="circleFocusCompConfIcon" class="fa fa-signal" title="Confidence" aria-hidden="true"></i>&nbsp;
+                                        <a><i id="circleFocusCompConfIcon" class="fa fa-signal" title="Confidence" aria-hidden="true"></i></a>&nbsp;
                                         <a id="circleFocusCompDetailsLink"><i class="fa fa-info-circle" title="Show more details" aria-hidden="true"></i></a>
                                     </div>
                                 </div>
@@ -216,6 +216,40 @@
     <!--END CONTENTS-->
 
     <!-- MODAL WINDOWS -->
+    <div class="smaller reveal" id="modal-competency-confidence-info" data-reveal>
+        <h3><i class="fa fa-info-circle" aria-hidden="true"></i> <span id="confDetailCompName"></span> Confidence</h3>
+        <p class="confDetailDesc">CaSS has determined a confidence of <span id="confDetailConf"></span> using the following method:</p>
+        <ul class="no-bullets confDetailListCtr">
+            <li>
+                <div class="grid-x">
+                    <div class="cell medium-3">
+                        <span class="confDetailListHdr">Source</span>
+                    </div>
+                    <div class="cell medium-3">
+                        <span class="confDetailListHdr">Claim</span>
+                    </div>
+                    <div class="cell medium-2">
+                        <span class="confDetailListHdr">Source's Confidence</span>
+                    </div>
+                    <div class="cell medium-2">
+                        <span class="confDetailListHdr">Confidence In Source</span>
+                    </div>
+                    <div class="cell medium-2">
+                        <span class="confDetailListHdr">Total Claim Confidence</span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <ul class="no-bullets confDetailListCtr" id="confDetailList"></ul>
+        <div id="confDetailExplanationCtr">
+            <p class="confDetailExp" id="confDetailExplanation"></p>
+        </div>
+        <button class="button" data-close>Close</button>
+        <button class="close-button" data-close aria-label="Close reveal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
     <div class="smaller reveal" id="modal-competency-info" data-reveal>
         <h3><i class="fa fa-info-circle" aria-hidden="true"></i> <span id="compDetCompName"></span></h3>
         <p><span id="compDetCompDesc"></span></p>
