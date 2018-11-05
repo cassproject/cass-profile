@@ -2118,6 +2118,7 @@ function fetchAssertionCompetencyFrameworks() {
     assertionsToQuery = assertionList.length;
     rawApplicableFrameworkList = [];
     $(assertionList).each(function (i, as) {
+        debugMessage("Fetching framework for competency: " + as.competency);
         EcFramework.search(repo, "(competency:\"" + as.competency + "\")",
             function (arrayOfEcFrameworks) {
                 handleSearchFrameworkSuccess(arrayOfEcFrameworks, as.competency);
