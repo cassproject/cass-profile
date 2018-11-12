@@ -1,4 +1,9 @@
 
 target/
 
+.DS_Store
 .idea/
+._DS_Store
+._*
+*/._*
+
