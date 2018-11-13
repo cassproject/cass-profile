@@ -117,6 +117,8 @@ body {
 }
 
 :root {
+  --main-body-font: 'assistant';
+  --main-header-font: 'oswald';
   --main-blue-color: #166D91;
   --secondary-blue-color: #95BED2;
   --tertiary-blue-color: #0E4E67;
@@ -558,8 +560,9 @@ span.frameworkCategoryGraphSummaryName {
 .compRelAlignmentHdr,
 .cirAsrSource,
 .cdmAsrSource {
-    font-size: .95rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--main-body-font);
     color: #000000;
 }
 
@@ -572,10 +575,11 @@ span.frameworkCategoryGraphSummaryName {
 .cirAsrText a,
 .cdmAsrText,
 .cdmAsrText a {
-    font-size: .9rem;
-    font-weight: 500;
-    color: #0b445b;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--main-blue-color);
 }
+
 
 .evidIndToggle {
     font-size: .7rem !important;
@@ -628,7 +632,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #profileHeader {
-    color: rgb(17, 116, 154);
+    color: #333;
 }
 #profileName {
   font-family: var(--main-header-font);
@@ -651,6 +655,16 @@ span.frameworkCategoryGraphSummaryName {
 #circleFocusDetailsSidebar h3 {
   font-family: var(--main-header-font);
   color: #333;
+  font-size: 1rem;
+}
+
+#circleFocusDetailsSingleName h3 {
+  font-size: 1.9375rem;
+}
+#circleFocusDetailsSidebar h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: var(--main-header-font);
 }
 
 #circleFocusSummarySidebar h3, .frameworkCategoryGraphSummaryName {

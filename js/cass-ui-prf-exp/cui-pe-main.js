@@ -789,11 +789,12 @@ function addSourceAssertionsToCompetencyDetailsModal(sourceName, sourceAssertion
     $(sourceAssertionArray).each(function (i, as) {
         var sourceAsLi = $("<li/>");
         sourceAsLi.addClass("cdmAsrText");
-        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">...claims subject ";
+        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">";
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
-        if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
-        else sourceAsLiHtml += "holds ";
-        sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
+        
+        if (isNegativeAssertion) sourceAsLiHtml.addClass("negativeAssertion");
+        else sourceAsLiHtml.addClass("positiveAssertion");
+        sourceAsLiHtml + getCompetencyOrFrameworkName(as.competency) + "</a>";
         sourceAsLiHtml += buildConfidenceIcon(as.confidence);
         sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
         sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
@@ -1634,7 +1635,7 @@ function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
     $(sourceAssertionArray).each(function (i, as) {
         var sourceAsLi = $("<li/>");
         sourceAsLi.addClass("cirAsrText");
-        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">...claims subject ";
+        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\"";
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
         if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
         else sourceAsLiHtml += "holds ";
