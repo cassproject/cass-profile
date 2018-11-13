@@ -1,3 +1,107 @@
+@font-face {
+    font-family: 'oswaldbold';
+    src: url('../fonts/Oswald/oswald-bold.woff2') format('woff2'),
+         url('../fonts/Oswald/oswald-bold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'oswaldextralight';
+    src: url('../fonts/Oswald/oswald-extralight.woff2') format('woff2'),
+         url('../fonts/Oswald/oswald-extralight.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'oswaldlight';
+    src: url('../fonts/Oswald/oswald-light.woff2') format('woff2'),
+         url('../fonts/Oswald/oswald-light.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'oswaldmedium';
+    src: url('../fonts/Oswald/oswald-medium.woff2') format('woff2'),
+         url('../fonts/Oswald/oswald-medium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'oswaldregular';
+    src: url('../fonts/Oswald/oswald-regular.woff2') format('woff2'),
+         url('../fonts/Oswald/oswald-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'oswaldsemibold';
+    src: url('../fonts/Oswald/oswald-semibold.woff2') format('woff2'),
+         url('../fonts/Oswald/oswald-semibold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+@font-face {
+    font-family: 'assistantbold';
+    src: url('../fonts/Assistant/assistant-bold.woff2') format('woff2'),
+         url('../fonts/Assistant/assistant-bold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'assistantextrabold';
+    src: url('../fonts/Assistant/assistant-extrabold.woff2') format('woff2'),
+         url('../fonts/Assistant/assistant-extrabold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'assistantextralight';
+    src: url('../fonts/Assistant/assistant-extralight.woff2') format('woff2'),
+         url('../fonts/Assistant/assistant-extralight.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'assistantlight';
+    src: url('../fonts/Assistant/assistant-light.woff2') format('woff2'),
+         url('../fonts/Assistant/assistant-light.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'assistantregular';
+    src: url('../fonts/Assistant/assistant-regular.woff2') format('woff2'),
+         url('../fonts/Assistant/assistant-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'assistantsemibold';
+    src: url('../fonts/Assistant/assistant-semibold.woff2') format('woff2'),
+         url('../fonts/Assistant/assistant-semibold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
 html,
 body {
     /* Dynamically resize for large screens */
@@ -5,6 +109,17 @@ body {
     /* Scale background to fit the screen */
     min-height: 100%;
     min-width: 100%;
+  --main-body-font: 'assistant';
+  --main-header-font: 'oswald';
+  	font-family: var(--main-body-font);
+
+
+}
+
+:root {
+  --main-blue-color: #166D91;
+  --secondary-blue-color: #95BED2;
+  --tertiary-blue-color: #0E4E67;
 }
 
 /* ---- UTILITY ---- */
@@ -107,11 +222,18 @@ input:checked~.switch-paddle {
     border-color: #EA6E07;
 }
 
-.fa-chevron-circle-down,
-.fa-chevron-circle-right {
-    color: black !important;
+.fa-chevron-down,
+.fa-chevron-right {
+  font-size: .8rem;
+  color: var(--main-blue-color);
 }
-
+.fa-circle {
+  color: var(--main-blue-color);
+  font-size: .6rem;
+}
+.fa-ul {
+  margin-left: .6rem;
+}
 /* ---- BADGES ---- */
 
 .cass-badge {
@@ -508,6 +630,9 @@ span.frameworkCategoryGraphSummaryName {
 #profileHeader {
     color: rgb(17, 116, 154);
 }
+#profileName {
+  font-family: var(--main-header-font);
+}
 
 #profileHeader,
 #circleFocusSummaryName {
@@ -523,6 +648,16 @@ span.frameworkCategoryGraphSummaryName {
     margin-top: 1rem;
 }
 
+#circleFocusDetailsSidebar h3 {
+  font-family: var(--main-header-font);
+  color: #333;
+}
+
+#circleFocusSummarySidebar h3, .frameworkCategoryGraphSummaryName {
+  font-family: var(--main-header-font);
+  color: #333;
+}
+
 #circleFocusSummarySidebar {
     padding-left: 1.5rem;
 }
@@ -533,7 +668,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #circleFocusSummarySidebar h3 {
-    color: rgb(17,116,154);
+    color: #333;
 }
 
 #circleFocusSummarySidebar h3,
@@ -549,6 +684,10 @@ span.frameworkCategoryGraphSummaryName {
     margin-top: 1em;
     max-height: 75%;
     overflow-y: auto;
+}
+
+#circleFocusSummaryListContainer ul {
+ margin-left: .5 rem !important;
 }
 
 #circleFocusRelatedFwListContainer {
@@ -625,7 +764,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 .gpsi {
-    color: black;
+    color: var(--main-blue-color);
 }
 
 .gpsiRootComp {
@@ -635,12 +774,12 @@ span.frameworkCategoryGraphSummaryName {
 .gpsiNonRootComp {}
 
 .gpsiChild {
-    margin-left: 1.2rem;
+    margin-left: .5rem;
     font-size: 1rem;
 }
 .psiItem {
-    color: black;
+    color: var(--main-blue-color);
 }
 .psiItem.active {
-    font-weight: bold;
+    font-weight: 500;
 }

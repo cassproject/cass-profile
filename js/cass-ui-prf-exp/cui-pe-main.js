@@ -1736,8 +1736,8 @@ function expandGraphViewSummaryToObject(expObj) {
         expObj.attr("style", "display:block");
         if (expObj.parent().children().eq(1) && expObj.parent().children().eq(1).find("i:first")) {
             var ic = expObj.parent().children().eq(0).find("i:first");
-            if (ic && (ic.hasClass("fa-chevron-circle-down") || ic.hasClass("fa-chevron-circle-right"))) {
-                ic.attr("class", "fa fa-chevron-circle-down");
+            if (ic && (ic.hasClass("fa-chevron-down") || ic.hasClass("fa-chevron-right"))) {
+                ic.attr("class", "fa fa-chevron-down");
             }
         }
         if (expObj.parent() && expObj.parent().parent()) {
@@ -1767,18 +1767,18 @@ function scrollToNameInGraphViewSummary(name) {
 }
 
 function toggleGraphProfileSummaryChild(ce) {
-    if (ce.find('i:first').hasClass("fa-chevron-circle-right")) {
-        ce.find('i:first').attr("class", "fa fa-chevron-circle-down");
+    if (ce.find('i:first').hasClass("fa-chevron-right")) {
+        ce.find('i:first').attr("class", "fa fa-chevron-down");
         ce.parent().find('ul:first').attr("style", "display:block");
     } else {
-        ce.find('i:first').attr("class", "fa fa-chevron-circle-right");
+        ce.find('i:first').attr("class", "fa fa-chevron-right");
         ce.parent().find('ul:first').attr("style", "display:none");
     }
 }
 
 function generateCompetencyLineItemHtmlForGraphProfileSummary(comp, hasChildren) {
     var liHtml = "";
-    if (hasChildren) liHtml += "<a onclick=\"toggleGraphProfileSummaryChild($(this))\"><i class=\"fa fa-chevron-circle-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>";
+    if (hasChildren) liHtml += "<a onclick=\"toggleGraphProfileSummaryChild($(this))\"><i class=\"fa fa-chevron-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>";
     else liHtml += "<i class=\"fa fa-circle " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i>";
     liHtml += "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(comp.getName().trim()) + "_psi" + "\" " +
         "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(comp.getId().trim()) + "',true)\">" + comp.getName().trim() + "</a>";
@@ -1866,7 +1866,7 @@ function addFrameworkCategoryToGraphProfileSummary(categoryName, fwArray) {
     $(fwArray).each(function (i, fw) {
         var fwLi = $("<li/>");
         var fwLiHtml = "<a onclick=\"toggleGraphProfileSummaryChild($(this))\">" +
-            "<i class=\"fa fa-chevron-circle-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>" +
+            "<i class=\"fa fa-chevron-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>" +
             "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(fw.name.trim()) + "_psi" + "\" " +
             "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(fw.shortId().trim()) + "',true)\">" +
             fw.name.trim() + "</a>";
