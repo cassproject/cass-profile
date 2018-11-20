@@ -94,6 +94,8 @@ var profileCompetencyData;
 var profileDisplayHelperData;
 var profileD3NodeString;
 
+var profileToOpen;
+
 //**************************************************************************************************
 // Data Structures
 //**************************************************************************************************
@@ -2359,6 +2361,18 @@ function setProfileUserAsLoggedInUserAndGo() {
     setUpProfileUserAndFetchAssertions(loggedInIdentityName, loggedInPkPem);
 }
 
+function setProfileUserAndGo(profilePem) {
+    var ct = contactsByPkPemMap[profilePem];
+    if (ct) {
+        hideProfileUserSearchContainer();
+        setUpProfileUserAndFetchAssertions(ct.displayName, profilePem);
+    }
+    else {
+        debugMessage("setProfileUserAndGo: could not locate contact info for: " + profilePem);
+        setUpForProfileUserSearch();
+    }
+}
+
 function setUpForProfileUserSearch() {
     fillInProfileUserSearchAutoComplete();
     clearProfileUserSearchBar();
@@ -2402,7 +2416,12 @@ function fillInProfileUserSearchAutoComplete() {
 
 function loadPageContents() {
     hideProfileExpTools();
+    if (profileToOpen && profileToOpen != "") {
+        var tp = profileToOpen;
+        profileToOpen = "";
+        setProfileUserAndGo(tp);
+    }
     //TODO loadPageContents At some point take loggedInPkPem check out and just start with setProfileUserAsLoggedInUserAndGo OR setUpForProfileUserSearch
-    if (loggedInPkPem == SAMANTHA_SMITH_PK_PEM) setProfileUserAsLoggedInUserAndGo();
+    else if (loggedInPkPem == SAMANTHA_SMITH_PK_PEM) setProfileUserAsLoggedInUserAndGo();
     else setUpForProfileUserSearch();
 }
