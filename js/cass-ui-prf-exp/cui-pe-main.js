@@ -26,6 +26,8 @@
 
 //TODO buildConfidenceExplanation check if a single claim is negative
 
+//TODO Handle Same Competency IDs across multiple frameworks
+
 //**************************************************************************************************
 // Constants
 
@@ -2052,14 +2054,14 @@ function collapseApplicableFrameworks() {
     showPageAsBusy("Collapsing frameworks...");
     frameworksCollapsed = 0;
     frameworksToCollapse = applicableFrameworkList.length;
-    frameworkNodePacketGraphMap = {}
+    frameworkNodePacketGraphMap = {};
     var fc;
     for (var i = 0; i < applicableFrameworkList.length; i++) {
         var fw = applicableFrameworkList[i];
         fc = new FrameworkCollapser();
         debugMessage("Collapsing framework: " + fw.shortId());
         fc.collapseFramework(repo, fw, CREATE_IMPLIED_RELATIONS, handleCollapseApplicableFrameworkSuccess, handleCollapseApplicableFrameworkFailure);
-    };
+    }
 }
 
 //**************************************************************************************************
