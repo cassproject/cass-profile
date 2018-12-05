@@ -325,11 +325,21 @@ function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
     $(iconId).addClass(getConfidenceClass(confidence));
 }
 
+/* new build confidence badge */
+function buildConfidenceIcon(confidence) {
+  console.log("conf", confidence);
+  var conf = confidence * 100;;
+    var retHtml = "&nbsp;&nbsp;" +
+        "<span class='badge'>" + conf + "</span>";
+    return retHtml;
+}
+
+/* old build confidence 
 function buildConfidenceIcon(conf) {
     var retHtml = "&nbsp;&nbsp;" + "" +
         "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i>";
     return retHtml;
-}
+}*/
 
 function buildAssertionShareIcon(assertionShortId) {
     if (isOwnProfile()) {
@@ -794,8 +804,8 @@ function addSourceAssertionsToCompetencyDetailsModal(sourceName, sourceAssertion
         
         if (isNegativeAssertion) sourceAsLiHtml.addClass("negativeAssertion");
         else sourceAsLiHtml.addClass("positiveAssertion");
-        sourceAsLiHtml + getCompetencyOrFrameworkName(as.competency) + "</a>";
         sourceAsLiHtml += buildConfidenceIcon(as.confidence);
+        sourceAsLiHtml + getCompetencyOrFrameworkName(as.competency) + "</a>";
         sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
         sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
         var evArray = getEvidenceForAssertion(as);
@@ -1628,19 +1638,21 @@ function buildGraphSidebarEvidenceDiv(evDivId, as, evArray) {
     evDiv.append(evUl);
     return evDiv;
 }
-
+ 
 function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
     $(CIR_FCS_DTL_ASR_LIST_CTR).append("<span class=\"cirAsrSource\">" + sourceName + "</span>");
     var sourceUl = $("<ul/>");
     $(sourceAssertionArray).each(function (i, as) {
         var sourceAsLi = $("<li/>");
         sourceAsLi.addClass("cirAsrText");
-        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\"";
+        var sourceAsLiHtml = buildConfidenceIcon(as.confidence);
+      
+        sourceAsLiHtml += "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\"";
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
         if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
         else sourceAsLiHtml += "holds ";
         sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
-        sourceAsLiHtml += buildConfidenceIcon(as.confidence);
+        
         sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
         sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
         var evArray = getEvidenceForAssertion(as);

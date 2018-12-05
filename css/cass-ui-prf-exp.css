@@ -126,6 +126,13 @@ body {
 
 /* ---- UTILITY ---- */
 
+h1, h2, h3, h4, h5 {
+  font-family: 'oswaldregular';
+}
+
+h3 {
+  font-size: 1.9375rem;
+}
 tspan {
     pointer-events: none;
 }
@@ -383,11 +390,13 @@ input:checked~.switch-paddle {
 
 .expCircleGraph .label {
     fill: #fff;
-    font-size: 12px;
+    font-family: 'assistant-regular';
+    font-weight: 600;
+    font-size: 13px;
     text-anchor: middle;
     paint-order: stroke;
     stroke: rgb(0, 0, 0);
-    stroke-width: 2px;
+    stroke-width: 1px;
     stroke-linecap: butt;
     stroke-linejoin: round;
 }
@@ -587,6 +596,7 @@ span.frameworkCategoryGraphSummaryName {
     background-color: #0b445b !important;
     color: #ffffff !important;
     margin-bottom: .4rem;
+  float:right;
 }
 
 .assertionShareIcon {
@@ -596,12 +606,17 @@ span.frameworkCategoryGraphSummaryName {
 
 .cirAsrEvDiv,
 .cdmAsrEvDiv {
-    margin-left: 1rem;
+    margin-left: .4rem;
 }
 
 .cirAsrEvDiv a,
 .cdmAsrEvDiv a {
     color: #116688;
+  font-weight:500;
+}
+.cirAsrEvDiv .fa  {
+  color: #707070;
+  margin-right: 4px;
 }
 
 #compDetAsrContainer span {
@@ -623,7 +638,7 @@ span.frameworkCategoryGraphSummaryName {
 #pdfPreviewObj,
 #htmlPreviewObj {
     height: 400px;
-    width: 400px;
+    width: 100%;
 }
 
 #imagePreviewObj {
@@ -647,22 +662,35 @@ span.frameworkCategoryGraphSummaryName {
     font-size: .95rem;
 }
 
+
+/*******************************
+
+  right side bar 
+
+*******************************/
+
+.badge {
+  vertical-align: text-bottom;
+  margin-right: 4px;
+}
 #circleFocusDetailsSidebar,
 #circleFocusSummarySidebar {
     margin-top: 1rem;
 }
 
+#circleFocusDetailsSidebar .cirAsrEvDiv a,  {
+  font-weight: 500;
+}
+
 #circleFocusDetailsSidebar h3 {
   font-family: var(--main-header-font);
   color: #333;
-  font-size: 1rem;
 }
 
 #circleFocusDetailsSingleName h3 {
-  font-size: 1.9375rem;
 }
 #circleFocusDetailsSidebar h2 {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 600;
   font-family: var(--main-header-font);
 }
@@ -676,11 +704,25 @@ span.frameworkCategoryGraphSummaryName {
     padding-left: 1.5rem;
 }
 
-#circleFocusDetailsAssertionListContainer ul {
-    list-style: none;
-    margin-bottom: 0;
+#circleFocusDetailsAssertionListContainer {
+  margin-left: 8px;
 }
 
+#circleFocusDetailsAssertionListContainer ul {
+  list-style: none;
+  margin-bottom: 0;
+  margin-left: 8px;
+}
+
+#circleFocusDetailsAssertionListContainer ul ul{
+  margin-left: 24px;
+  text-indent: -10px;
+}
+
+
+#circleFocusDetailsAssertionListContainer li fa {
+  color: #707070;
+}
 #circleFocusSummarySidebar h3 {
     color: #333;
 }
@@ -719,6 +761,7 @@ span.frameworkCategoryGraphSummaryName {
 
 #circleFocusDetailsRelListContainer {
     margin-top: 1.5rem;
+  margin-left: 1.5rem;
 }
 
 #circleFocusDetailsRelList a {
@@ -783,6 +826,7 @@ span.frameworkCategoryGraphSummaryName {
 
 .gpsiRootComp {
     font-size: 1.05rem;
+  font-weight: 600;
 }
 
 .gpsiNonRootComp {}
@@ -796,4 +840,20 @@ span.frameworkCategoryGraphSummaryName {
 }
 .psiItem.active {
     font-weight: 500;
+}
+
+
+/****************************************
+
+  modal style for assertion details 
+
+*****************************************/
+#modal-assertion-details {
+  
+}
+
+#modal-assertion-details #asrDetEvList {
+  margin-left: 1rem;
+  list-style-type: none;
+  text-indent: -6px;
 }
