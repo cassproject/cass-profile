@@ -374,7 +374,8 @@ input:checked~.switch-paddle {
 }
 
 .expCircleGraph .node {
-    cursor: pointer;
+  cursor: pointer;
+  filter:url(#drop-shadow);
 }
 
 .expCircleGraph .node:hover {
@@ -584,7 +585,7 @@ span.frameworkCategoryGraphSummaryName {
 .cirAsrText a,
 .cdmAsrText,
 .cdmAsrText a {
-    font-size: 1rem;
+    font-size: .8rem;
     font-weight: 700;
     color: var(--main-blue-color);
 }
@@ -607,6 +608,7 @@ span.frameworkCategoryGraphSummaryName {
 .cirAsrEvDiv,
 .cdmAsrEvDiv {
     margin-left: .4rem;
+  display:block !important;
 }
 
 .cirAsrEvDiv a,
@@ -673,6 +675,12 @@ span.frameworkCategoryGraphSummaryName {
   vertical-align: text-bottom;
   margin-right: 4px;
 }
+
+.cirAsrSourceExpand {
+  float: right;
+  margin-right: 8px;
+}
+
 #circleFocusDetailsSidebar,
 #circleFocusSummarySidebar {
     margin-top: 1rem;
@@ -706,12 +714,20 @@ span.frameworkCategoryGraphSummaryName {
 
 #circleFocusDetailsAssertionListContainer {
   margin-left: 8px;
+  margin-top: 12px;
+  line-height: 1rem;
+}
+
+.expandSourceAssertions {
+  
 }
 
 #circleFocusDetailsAssertionListContainer ul {
   list-style: none;
   margin-bottom: 0;
   margin-left: 8px;
+  margin-top: 8px;
+  display: none;
 }
 
 #circleFocusDetailsAssertionListContainer ul ul{
