@@ -110,7 +110,7 @@ body {
     min-height: 100%;
     min-width: 100%;
   --main-body-font: 'assistantregular';
-  --main-header-font: 'oswald';
+  --main-header-font: 'oswaldregular';
   	font-family: var(--main-body-font);
 
 
