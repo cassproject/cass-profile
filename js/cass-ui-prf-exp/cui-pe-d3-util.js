@@ -356,25 +356,25 @@ function buildExpGraphCircles(error, root) {
         .attr("in", "blur")
         .attr("dx", .5)
         .attr("dy", .5)
-        .attr("result", "offsetBlur");
+        .attr("result", "offsetBlur");  
+    var feComponentTransfer = filter.append("feComponentTransfer")
+      .attr("in", "offsetBlur")
+      .attr("result", "linearSlope");
+      feComponentTransfer.append("feFuncA")
+          .attr("type", "linear")
+          .attr("slope", "0.6");
+
     //important for opacity reduction on filter
-    var feComponentTransfer = filter.append("feComponentTransfer");
-    feComponentTransfer.append("feFuncA")
-        .attr("in", "offsetBlur")
-        .attr("type", "linear")
-        .attr("slope", ".6")
-        .attr("result", "opacityBlur");
-    filter.append("feComposite")
-        .attr("operator", "out")
-        .attr("in", "sourceGraphic");
     // important for allowing manipulation of hover
     var feMerge = filter.append("feMerge");
     feMerge.append("feMergeNode")
-        .attr("in", "opacityBlur")
+        .attr("in", "linearSlope")
     feMerge.append("feMergeNode")
         .attr("in", "SourceGraphic");
 
 
+  
+  
     expCgCircle = expCirclePackGraph.selectAll("circle")
         .data(nodes)
         .enter().append("circle")
@@ -397,22 +397,6 @@ function buildExpGraphCircles(error, root) {
             } else(debugMessage("Circle click: d.data is null"));
             d3.event.stopPropagation();
         });
-
-
-    /*****************************************************
-     testing adding a rectangle svg behind text
-
-     var rect = expCirclePackGraph.selectAll("rect")
-     .data(nodes)
-     .enter()
-     .append("rect")
-     .attr("width", 20)
-     .attr("height", 20)
-     .style("fill", "#ccc")
-     .style("fill-opacity", ".3")
-     .style("stroke", "#666")
-     .style("stroke-width", "1.5px");
-     ***************************************************/
 
 
     var text = expCirclePackGraph.selectAll("text")
