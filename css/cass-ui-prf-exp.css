@@ -463,6 +463,10 @@ input:checked~.switch-paddle {
     font-size:.9rem;
 }
 
+.confDetailListHdr ul {
+    line-height:1.2rem;
+}
+
 .confDetailListItem {
     font-size:.8rem;
 }
@@ -631,7 +635,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #compDetAsrContainer span {
-    margin-left: 2rem;
+    margin-left: 1rem;
 }
 
 #compDetAsrContainer span.label {
@@ -639,7 +643,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #compDetAsrContainer ul {
-    margin-left: 4rem;
+    margin-left: 2rem;
 }
 
 #evDetPrevContainer {
@@ -683,7 +687,6 @@ span.frameworkCategoryGraphSummaryName {
 .badge {
   vertical-align: text-bottom;
   margin-right: 4px;
-  padding: .5em;
 }
 
 .cirAsrSourceExpand {

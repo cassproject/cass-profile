@@ -806,8 +806,10 @@ function addSourceAssertionsToCompetencyDetailsModal(sourceName, sourceAssertion
         var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">";
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
         
-        if (isNegativeAssertion) sourceAsLiHtml.addClass("negativeAssertion");
-        else sourceAsLiHtml.addClass("positiveAssertion");
+        if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
+        else sourceAsLiHtml += "holds ";
+        sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
+      
         sourceAsLiHtml += buildConfidenceIcon(as.confidence);
         sourceAsLiHtml + getCompetencyOrFrameworkName(as.competency) + "</a>";
         sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
