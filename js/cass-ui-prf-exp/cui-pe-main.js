@@ -344,7 +344,7 @@ function buildConfidenceIcon(conf) {
 function buildAssertionShareIcon(assertionShortId) {
     if (isOwnProfile()) {
         var retHtml = "&nbsp;&nbsp;" + "" +
-            "<a class=\"assertionShareIcon\"><i class=\"fa fa-share-alt-square\" onclick=\"shareAssertion('" + assertionShortId + "');\" " +
+            "<a class=\"assertionShareIcon\"><i class=\"fa fa-share-square\" onclick=\"shareAssertion('" + assertionShortId + "');\" " +
             "title=\"Share claim\" aria-hidden=\"true\"></i></a>";
         return retHtml;
     }
@@ -368,7 +368,7 @@ function toggleEvDivInd(ce) {
         ce.find('i:first').attr("class", "fa fa-chevron-down");
         ce.attr("title", "Hide evidence");
     } else {
-        ce.find('i:first').attr("class", "fa fa-chevron-right");
+        ce.find('i:first').attr("class", "far fa-chevron-right");
         ce.attr("title", "View evidence");
     }
 }
@@ -1669,9 +1669,6 @@ function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
         var evDiv = null;
         if (evArray && evArray.length > 0) {
             var evDivId = buildIDableString(as.shortId() + "_evdiv_csr");
-            sourceAsLiHtml += "&nbsp;&nbsp;<a onclick=\"$('#" + evDivId + "').toggle();toggleEvDivInd($(this));\" " +
-                "title=\"View evidence\" class=\"button tiny evidIndToggle\">" + evArray.length +
-                "&nbsp;&nbsp;<i class=\"fa fa-chevron-right\"></i></a>";
             evDiv = buildGraphSidebarEvidenceDiv(evDivId, as, evArray);
         }
         sourceAsLi.html(sourceAsLiHtml);

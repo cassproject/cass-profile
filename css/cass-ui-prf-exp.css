@@ -6,7 +6,7 @@
     font-style: normal;
 
 }
-
+ 
 @font-face {
     font-family: 'oswaldextralight';
     src: url('../fonts/Oswald/oswald-extralight.woff2') format('woff2'),
@@ -132,6 +132,12 @@ h1, h2, h3, h4, h5 {
 
 h3 {
   font-size: 1.9375rem;
+}
+
+h4 {
+ font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
 }
 tspan {
     pointer-events: none;
@@ -577,7 +583,9 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 .cirAsrText {
-    display:block !important;
+  display: block !important;
+  line-height:.8rem;
+  margin-bottom: 8px;
 }
 
 .compRelAlignmentText,
@@ -602,7 +610,8 @@ span.frameworkCategoryGraphSummaryName {
 
 .assertionShareIcon {
     font-size: 1.2rem !important;
-    color: #1DA7A7 !important;
+    color: var(--main-blue-color) !important;
+  float:right;
 }
 
 .cirAsrEvDiv,
@@ -674,6 +683,7 @@ span.frameworkCategoryGraphSummaryName {
 .badge {
   vertical-align: text-bottom;
   margin-right: 4px;
+  padding: .5em;
 }
 
 .cirAsrSourceExpand {
@@ -776,7 +786,11 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #circleFocusDetailsRelListContainer {
-    margin-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+#circleFocusDetailsRelListContainer ul {
+  margin-top: 1.5rem;
   margin-left: 1.5rem;
 }
 
