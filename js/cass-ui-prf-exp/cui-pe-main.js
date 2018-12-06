@@ -323,7 +323,8 @@ function divideAssertionsBySource(asArray) {
 }
 
 function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
-    $(iconId).attr("class", CONF_CLASS_BASE);
+    var confidenceValue = confidence * 100;
+    $(iconId).text(confidenceValue);
     $(iconId).attr("title", buildConfidenceTitle(confidence));
     $(iconId).attr("onclick","openConfidenceDetailsModal('" + escapeSingleQuote(cpdId) + "')");
     $(iconId).addClass(getConfidenceClass(confidence));
@@ -1506,8 +1507,7 @@ function generateCompetencyLineItemHtmlForListView(cpd, comp, frameworkName, has
     var confidenceValue = conf * 100;
   console.log('this is confidence', confidenceValue);
     var liHtml = 
-        "<span class=\"competency-type\">" +
-        "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" + "<span class=\"badge " + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></span>" + confidenceValue + "</a>"  + "&nbsp;&nbsp;&nbsp;" +
+        "<span class=\"competency-type\">" + "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" + "<span class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\">"  + confidenceValue +  "</span></a>"  + "&nbsp;&nbsp;&nbsp;" +
         "<a onclick=\"showCompetencyDetailsModal('" + escapeSingleQuote(comp.getId().trim()) + "');\">" +
         "<i class=\"fa fa-info-circle\" title=\"Show more details\" aria-hidden=\"true\"></i></a></span>" +
         "<h4 class=\"title\">";

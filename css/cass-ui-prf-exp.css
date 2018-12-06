@@ -345,8 +345,9 @@ input:checked~.switch-paddle {
 }
 
 #list-screen__root .competency-type .fa {
-    font-size: 1.3em;
-    /*    color: #000;*/
+    font-size: 1.4rem;
+  vertical-align:text-bottom;
+  color: #333;
 }
 
 /* ---- CIRCLE GRAPH SCREEN ---- */
@@ -687,6 +688,11 @@ span.frameworkCategoryGraphSummaryName {
 .badge {
   vertical-align: text-bottom;
   margin-right: 4px;
+  font-weight: 600;
+}
+
+.competency-type . fa-info-circle {
+  font-size: 1.6em;
 }
 
 .cirAsrSourceExpand {
@@ -703,6 +709,11 @@ span.frameworkCategoryGraphSummaryName {
   font-weight: 500;
 }
 
+#circleFocusDetailsSidebar .badge {
+  font-size: .8rem;
+  font-weight:600;
+  vertical-align:middle
+}
 #circleFocusDetailsSidebar h3 {
   font-family: var(--main-header-font);
   color: #333;
@@ -762,7 +773,8 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #circleFocusCompDetailsLink i {
-    margin-top: .8rem;
+  font-size:1.5em;
+  vertical-align: middle
 }
 
 #circleFocusSummaryListContainer {
@@ -806,51 +818,28 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 .highConf {
-    color: rgb(0, 128, 43);
-    background-color: rgb(0, 128, 43);
+    color:white;
+    background-color: #46a49e;
 }
 
 .midHighConf {
-    color: rgb(0, 128, 43);
-    background: rgb(0, 128, 43);
-    background-color: rgb(0, 128, 43);
-    background: linear-gradient(90deg, rgba(0, 128, 43, 1) 79%, rgba(0, 128, 43, 0.2) 80%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    text-fill-color: transparent;
-    -webkit-text-fill-color: transparent;
+    color: white;
+    background-color: #136d91;
 }
 
 .midConf {
-    color: rgb(191, 184, 0);
-    background: rgb(191, 184, 0);
+    color: white;
     background-color: rgb(191, 184, 0);
-    background: linear-gradient(90deg, rgba(191, 184, 0, 1) 60%, rgba(191, 184, 0, 0.2) 61%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    text-fill-color: transparent;
-    -webkit-text-fill-color: transparent;
 }
 
 .midLowConf {
-    color: rgb(173, 90, 8);
-    background: rgb(173, 90, 8);
-    background-color: rgb(173, 90, 8);
-    background: linear-gradient(90deg, rgba(173, 90, 8, 1) 35%, rgba(173, 90, 8, 0.2) 36%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    text-fill-color: transparent;
-    -webkit-text-fill-color: transparent;
+    color: white;
+    background-color:#e29e75;
 }
 
 .lowConf {
-    color: rgb(204, 41, 0);
-    background: rgb(204, 41, 0);
-    background: linear-gradient(90deg, rgba(204, 41, 0, 1) 19%, rgba(204, 41, 0, 0.2) 20%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    text-fill-color: transparent;
-    -webkit-text-fill-color: transparent;
+    color: white;
+    background-color: #b36b79;
 }
 
 #compCredentialDegreeCertsContainer span {
