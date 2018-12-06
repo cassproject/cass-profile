@@ -109,7 +109,7 @@ body {
     /* Scale background to fit the screen */
     min-height: 100%;
     min-width: 100%;
-  --main-body-font: 'assistant';
+  --main-body-font: 'assistantregular';
   --main-header-font: 'oswald';
   	font-family: var(--main-body-font);
 
@@ -117,8 +117,8 @@ body {
 }
 
 :root {
-  --main-body-font: 'assistant';
-  --main-header-font: 'oswald';
+  --main-body-font: 'assistantregular';
+  --main-header-font: 'oswaldregular';
   --main-blue-color: #166D91;
   --secondary-blue-color: #95BED2;
   --tertiary-blue-color: #0E4E67;
@@ -397,7 +397,7 @@ input:checked~.switch-paddle {
 
 .expCircleGraph .label {
     fill: #fff;
-    font-family: 'assistant-regular';
+    font-family: 'assistantregular';
     font-weight: 600;
     font-size: 13px;
     text-anchor: middle;
