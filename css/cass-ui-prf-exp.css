@@ -588,7 +588,7 @@ span.frameworkCategoryGraphSummaryName {
 
 .cirAsrText {
   display: block !important;
-  line-height:.8rem;
+  line-height:.9rem;
   margin-bottom: 8px;
 }
 
@@ -597,7 +597,7 @@ span.frameworkCategoryGraphSummaryName {
 .cirAsrText a,
 .cdmAsrText,
 .cdmAsrText a {
-    font-size: .8rem;
+    font-size: .9rem;
     font-weight: 700;
     color: var(--main-blue-color);
 }
@@ -807,11 +807,13 @@ span.frameworkCategoryGraphSummaryName {
 
 .highConf {
     color: rgb(0, 128, 43);
+    background-color: rgb(0, 128, 43);
 }
 
 .midHighConf {
     color: rgb(0, 128, 43);
     background: rgb(0, 128, 43);
+    background-color: rgb(0, 128, 43);
     background: linear-gradient(90deg, rgba(0, 128, 43, 1) 79%, rgba(0, 128, 43, 0.2) 80%);
     background-clip: text;
     -webkit-background-clip: text;
@@ -822,6 +824,7 @@ span.frameworkCategoryGraphSummaryName {
 .midConf {
     color: rgb(191, 184, 0);
     background: rgb(191, 184, 0);
+    background-color: rgb(191, 184, 0);
     background: linear-gradient(90deg, rgba(191, 184, 0, 1) 60%, rgba(191, 184, 0, 0.2) 61%);
     background-clip: text;
     -webkit-background-clip: text;
@@ -832,6 +835,7 @@ span.frameworkCategoryGraphSummaryName {
 .midLowConf {
     color: rgb(173, 90, 8);
     background: rgb(173, 90, 8);
+    background-color: rgb(173, 90, 8);
     background: linear-gradient(90deg, rgba(173, 90, 8, 1) 35%, rgba(173, 90, 8, 0.2) 36%);
     background-clip: text;
     -webkit-background-clip: text;

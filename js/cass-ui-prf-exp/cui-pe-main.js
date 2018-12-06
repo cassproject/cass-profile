@@ -329,21 +329,12 @@ function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
     $(iconId).addClass(getConfidenceClass(confidence));
 }
 
-/* new build confidence badge */
 function buildConfidenceIcon(confidence) {
-  console.log("conf", confidence);
   var conf = confidence * 100;;
     var retHtml = "&nbsp;&nbsp;" +
         "<span class='badge'>" + conf + "</span>";
     return retHtml;
 }
-
-/* old build confidence 
-function buildConfidenceIcon(conf) {
-    var retHtml = "&nbsp;&nbsp;" + "" +
-        "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i>";
-    return retHtml;
-}*/
 
 function buildAssertionShareIcon(assertionShortId) {
     if (isOwnProfile()) {
@@ -1512,10 +1503,11 @@ function scrollToCompInListView(compName) {
 function generateCompetencyLineItemHtmlForListView(cpd, comp, frameworkName, hasChildren) {
     var asArray = getAssertionsForCompetencyPacketData(cpd);
     var conf = determineConfidenceForAssertions(asArray);
-    var liHtml = "<span class=\"competency-type\">" +
-        "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" +
-        "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i></a>" +
-        "&nbsp;&nbsp;&nbsp;" +
+    var confidenceValue = conf * 100;
+  console.log('this is confidence', confidenceValue);
+    var liHtml = 
+        "<span class=\"competency-type\">" +
+        "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" + "<span class=\"badge " + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></span>" + confidenceValue + "</a>"  + "&nbsp;&nbsp;&nbsp;" +
         "<a onclick=\"showCompetencyDetailsModal('" + escapeSingleQuote(comp.getId().trim()) + "');\">" +
         "<i class=\"fa fa-info-circle\" title=\"Show more details\" aria-hidden=\"true\"></i></a></span>" +
         "<h4 class=\"title\">";
