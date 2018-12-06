@@ -88,10 +88,10 @@ else {
 // Initial Page Load
 //**************************************************************************************************
 $(document).ready(function () {
-    if (queryParams.frameworkId && queryParams.frameworkId != "") {
-        frameworkToOpen = queryParams.frameworkId;
+    if (queryParams.profilePem && queryParams.profilePem != "") {
+        profileToOpen = queryParams.profilePem;
     }
-    else frameworkToOpen = null;
+    else profileToOpen = null;
     if (queryParams.user == "wait") {
         debugMessage("Received user='wait' parameter...");
         showPageAsBusy("Initializing Profile Explorer...");

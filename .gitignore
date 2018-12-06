@@ -2,8 +2,9 @@
 target/
 
 .DS_Store
-.idea/
 ._DS_Store
 ._*
 */._*
 
+.idea/
+build\.log
