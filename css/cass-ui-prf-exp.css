@@ -603,7 +603,10 @@ span.frameworkCategoryGraphSummaryName {
     color: var(--main-blue-color);
 }
 
-
+.cirAsrText .badge {
+  margin-right:4px;
+  height: width;
+}
 .evidIndToggle {
     font-size: .7rem !important;
     padding: 3px 4px;
@@ -614,8 +617,9 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 .assertionShareIcon {
-    font-size: 1.2rem !important;
-    color: var(--main-blue-color) !important;
+  font-size: 1.2rem !important;
+  margin-right: 24px;
+  color: var(--main-blue-color) !important;
   float:right;
 }
 
@@ -686,13 +690,14 @@ span.frameworkCategoryGraphSummaryName {
 *******************************/
 
 .badge {
-  vertical-align: text-bottom;
-  margin-right: 4px;
   font-weight: 600;
 }
 
 .competency-type . fa-info-circle {
   font-size: 1.6em;
+}
+.competency-type a {
+  margin: 2px;
 }
 
 .cirAsrSourceExpand {
@@ -710,8 +715,6 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #circleFocusDetailsSidebar .badge {
-  font-size: .8rem;
-  font-weight:600;
   vertical-align:middle
 }
 #circleFocusDetailsSidebar h3 {
@@ -773,7 +776,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #circleFocusCompDetailsLink i {
-  font-size:1.5em;
+  font-size:1.2em;
   vertical-align: middle
 }
 
