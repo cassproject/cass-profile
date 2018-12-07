@@ -1633,25 +1633,29 @@ function buildGraphSidebarEvidenceDiv(evDivId, as, evArray) {
     return evDiv;
 }
  
-function toggleSourceAssertions() {
-  $("#circleFocusDetailsAssertionListContainer ul").toggle();
-  
-  if($("#circleFocusDetailsAssertionListContainer .cirAsrSourceExpand").hasClass("fa-chevron-right")) {
-     $("#circleFocusDetailsAssertionListContainer .cirAsrSourceExpand").removeClass('fa-chevron-right').addClass('fa-chevron-down');
+function toggleSourceAssertions(sourceName, el) {
+    console.log("source", sourceName);
+  $("#circleFocusDetailsAssertionListContainer ." + sourceName).toggle();
+  if($(el).find("i").hasClass("fa-chevron-right")) {
+     $(el).find("i").removeClass('fa-chevron-right').addClass('fa-chevron-down');
   } else {
-    $("#circleFocusDetailsAssertionListContainer .cirAsrSourceExpand").removeClass('fa-chevron-down').addClass('fa-chevron-right');
+    $(el).find("i").removeClass('fa-chevron-down').addClass('fa-chevron-right');
   }
  
 }
 
 function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
+    var sourceNamed = sourceName.replace(/\s/g,'');
     $(CIR_FCS_DTL_ASR_LIST_CTR)
-      .append("<span onclick='toggleSourceAssertions()' class=\"cirAsrSource\">" + sourceName +  
-              "<i class=\"cirAsrSourceExpand fa fa-chevron-right\"></i></span>"); 
+      .append("<span onclick='toggleSourceAssertions(\""+sourceNamed+"\", this);' class=\"cirAsrSource\">" + sourceName +  
+              "<i  class=\"cirAsrSourceExpand fa fa-chevron-down\"></i></span>"); 
     var sourceUl = $("<ul/>");
+    sourceUl.addClass(sourceNamed);
+    console.log("source name", sourceNamed);
     $(sourceAssertionArray).each(function (i, as) {
         var sourceAsLi = $("<li/>");
         sourceAsLi.addClass("cirAsrText");
+        sourceAsLi.addClass(sourceNamed);
         var sourceAsLiHtml = buildConfidenceIcon(as.confidence);
       
         sourceAsLiHtml += "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\"";

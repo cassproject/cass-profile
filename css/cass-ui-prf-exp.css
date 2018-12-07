@@ -581,10 +581,13 @@ span.frameworkCategoryGraphSummaryName {
 .compRelAlignmentHdr,
 .cirAsrSource,
 .cdmAsrSource {
+    cursor: pointer;
+    display:block;
     font-size: 1rem;
     font-weight: 700;
     font-family: var(--main-body-font);
     color: #000000;
+    line-height: 1.8em !important;
 }
 
 .cirAsrText {
@@ -707,7 +710,8 @@ span.frameworkCategoryGraphSummaryName {
 
 .cirAsrSourceExpand {
   float: right;
-  margin-right: 8px;
+  cursor: pointer;
+  margin: 8px 8px 0px 0px;
 }
 
 #circleFocusDetailsSidebar,
@@ -759,7 +763,6 @@ span.frameworkCategoryGraphSummaryName {
   margin-bottom: 0;
   margin-left: 8px;
   margin-top: 8px;
-  display: none;
 }
 
 #circleFocusDetailsAssertionListContainer ul ul{
