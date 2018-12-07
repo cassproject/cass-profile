@@ -333,7 +333,7 @@ function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
 function buildConfidenceIcon(confidence) {
   var conf = confidence * 100;;
     var retHtml = "&nbsp;&nbsp;" +
-        "<span class='badge'>" + conf + "</span>";
+        "<span class=\"" + CONF_CLASS_BASE + " badge " + getConfidenceClass(confidence) + "\">" + conf + "</span>";
     return retHtml;
 }
 
@@ -1505,7 +1505,6 @@ function generateCompetencyLineItemHtmlForListView(cpd, comp, frameworkName, has
     var asArray = getAssertionsForCompetencyPacketData(cpd);
     var conf = determineConfidenceForAssertions(asArray);
     var confidenceValue = conf * 100;
-  console.log('this is confidence', confidenceValue);
     var liHtml = 
         "<span class=\"competency-type\">" + "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" + "<span class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\">"  + confidenceValue +  "</span></a>"  + "&nbsp;&nbsp;&nbsp;" +
         "<a onclick=\"showCompetencyDetailsModal('" + escapeSingleQuote(comp.getId().trim()) + "');\">" +

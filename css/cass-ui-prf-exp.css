@@ -693,8 +693,13 @@ span.frameworkCategoryGraphSummaryName {
   font-weight: 600;
 }
 
-.competency-type . fa-info-circle {
+.competency-type .fa-info-circle {
   font-size: 1.6em;
+  margin-top: 6px;
+}
+
+.competency-type .badge {
+  vertical-align: text-bottom;
 }
 .competency-type a {
   margin: 2px;
