@@ -84,7 +84,7 @@ const FA_CLASS_CERTIFICATE = "fa-certificate";
 const FA_CLASS_DEFAULT = "fa-cogs";
 
 // Confidence Classes
-const CONF_CLASS_BASE = "fa fa-signal";
+const CONF_CLASS_BASE = "badge";
 const HIGH_CONF_CLASS = "highConf";
 const MID_HIGH_CONF_CLASS = "midHighConf";
 const MID_CONF_CLASS = "midConf";

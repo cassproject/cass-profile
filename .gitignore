@@ -1,5 +1,10 @@
 
 target/
 
+.DS_Store
+._DS_Store
+._*
+*/._*
+
 .idea/
 build\.log

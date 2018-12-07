@@ -21,7 +21,7 @@
                 <div class="grid-container full">
                     <div class="grid-x grid-padding-x grid-padding-y">
                         <div class="cell medium-10">
-                            <h2 id="profileHeader" onclick="goToDisplayRoot()"><i class="fa fa-user-circle" aria-hidden="true"></i> <span id="profileName"></span></h2>
+                            <h2 id="profileHeader" onclick="goToDisplayRoot()"><i class="fa fa-id-card-o" aria-hidden="true"></i> <span id="profileName"></span></h2>
                         </div>
                         <div class="cell medium-2">
                             <div id="page-tools" style="display:none">
@@ -154,7 +154,7 @@
                         <div class="grid-x grid-padding-x">
                             <div id="circleFocusSummarySidebar" class="cell medium-4 large-3 medium-cell-block-y">
                                 <!--<h2 onclick="goToDisplayRoot()" id="circleFocusSummaryName"></h2>-->
-                                <h3 onclick="goToDisplayRoot()" id=""><i class="fa fa-id-card-o"></i> Profile Explorer</h3>
+                                <h3 onclick="goToDisplayRoot()" id=""> Profile Explorer</h3>
                                 <p id="circleFocusSummaryDesc"></p>
                                 <div id="circleFocusSummaryListContainer"></div>
                             </div>
@@ -163,19 +163,30 @@
                                     <svg id="explorerCirclePack" width="500" height="500" viewBox="0 0 500 500"></svg>
                                 </div>
                             </div>
+                         
                             <div id="circleFocusDetailsSidebar" class="cell medium-4 large-3 medium-cell-block-y hide">
                                 <div class="grid-x">
-                                    <div class="cell medium-10">
+                                    <div class="cell medium-9">
                                         <h3 id="circleFocusDetailsSingleName"></h3>
                                     </div>
-                                    <div id="circleFocusCompTools" class="cell medium-2">
-                                        <a><i id="circleFocusCompConfIcon" class="fa fa-signal" title="Confidence" aria-hidden="true"></i></a>&nbsp;
-                                        <a id="circleFocusCompDetailsLink"><i class="fa fa-info-circle" title="Show more details" aria-hidden="true"></i></a>
+                                    <div id="circleFocusCompTools" class="cell medium-3">
+                                        <a>
+                                          <span id="circleFocusCompConfIcon" class="badge" title="Confidence" aria-hidden="true">
+                                          </span>
+                                        </a>&nbsp;
+                                         <a id="circleFocusCompDetailsLink">
+                                          <i class="fa fa-info-circle" title="Show more details" aria-hidden="true">
+                                          </i>
+                                        </a>
                                     </div>
                                 </div>
                                 <p id="circleFocusDetailsSingleDesc" class="lead"></p>
+                                <div>
+                                  <h4> Assertions </h4>
+                                </div>
                                 <div id="circleFocusDetailsAssertionListContainer"></div>
                                 <div id="circleFocusDetailsRelListContainer">
+                                  <h4> Skill Relationships </h4>
                                     <ul id="circleFocusDetailsRelList" class="fa-ul"></ul>
                                 </div>
                             </div>
@@ -216,7 +227,7 @@
     <!--END CONTENTS-->
 
     <!-- MODAL WINDOWS -->
-    <div class="smaller reveal" id="modal-competency-confidence-info" data-reveal>
+    <div class="small reveal" id="modal-competency-confidence-info" data-reveal>
         <h3><i class="fa fa-info-circle" aria-hidden="true"></i> <span id="confDetailCompName"></span> Confidence</h3>
         <p class="confDetailDesc">CaSS has determined a confidence of <span id="confDetailConf"></span> using the following method:</p>
         <ul class="no-bullets confDetailListCtr">
@@ -365,7 +376,7 @@
         </button>
     </div>
 
-    <div class="tiny reveal" id="modal-share-assertion" data-reveal>
+    <div class="small reveal" id="modal-share-assertion" data-reveal>
         <h4><i class="fa fa-share-alt-square" aria-hidden="true"></i> Share Claim</span></h4>
         <p id="asrShareAssertionDesc"></p>
         <p><span>To share a claim, it must be added to a portfolio.  Portfolios can then be shared with your contacts.</span></p>

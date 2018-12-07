@@ -323,22 +323,24 @@ function divideAssertionsBySource(asArray) {
 }
 
 function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
-    $(iconId).attr("class", CONF_CLASS_BASE);
+    var confidenceValue = confidence * 100;
+    $(iconId).text(confidenceValue);
     $(iconId).attr("title", buildConfidenceTitle(confidence));
     $(iconId).attr("onclick","openConfidenceDetailsModal('" + escapeSingleQuote(cpdId) + "')");
     $(iconId).addClass(getConfidenceClass(confidence));
 }
 
-function buildConfidenceIcon(conf) {
-    var retHtml = "&nbsp;&nbsp;" + "" +
-        "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i>";
+function buildConfidenceIcon(confidence) {
+  var conf = confidence * 100;;
+    var retHtml = "&nbsp;&nbsp;" +
+        "<span class=\"" + CONF_CLASS_BASE + " badge " + getConfidenceClass(confidence) + "\">" + conf + "</span>";
     return retHtml;
 }
 
 function buildAssertionShareIcon(assertionShortId) {
     if (isOwnProfile()) {
         var retHtml = "&nbsp;&nbsp;" + "" +
-            "<a class=\"assertionShareIcon\"><i class=\"fa fa-share-alt-square\" onclick=\"shareAssertion('" + assertionShortId + "');\" " +
+            "<a class=\"assertionShareIcon\"><i class=\"fa fa-share-square\" onclick=\"shareAssertion('" + assertionShortId + "');\" " +
             "title=\"Share claim\" aria-hidden=\"true\"></i></a>";
         return retHtml;
     }
@@ -362,7 +364,7 @@ function toggleEvDivInd(ce) {
         ce.find('i:first').attr("class", "fa fa-chevron-down");
         ce.attr("title", "Hide evidence");
     } else {
-        ce.find('i:first').attr("class", "fa fa-chevron-right");
+        ce.find('i:first').attr("class", "far fa-chevron-right");
         ce.attr("title", "View evidence");
     }
 }
@@ -793,21 +795,21 @@ function addSourceAssertionsToCompetencyDetailsModal(sourceName, sourceAssertion
     $(sourceAssertionArray).each(function (i, as) {
         var sourceAsLi = $("<li/>");
         sourceAsLi.addClass("cdmAsrText");
-        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">...claims subject ";
+        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">";
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
+        
         if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
         else sourceAsLiHtml += "holds ";
         sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
+      
         sourceAsLiHtml += buildConfidenceIcon(as.confidence);
+        sourceAsLiHtml + getCompetencyOrFrameworkName(as.competency) + "</a>";
         sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
         sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
         var evArray = getEvidenceForAssertion(as);
         var evDiv = null;
         if (evArray && evArray.length > 0) {
             var evDivId = buildIDableString(as.shortId() + "_evdiv_cdm");
-            sourceAsLiHtml += "&nbsp;&nbsp;<a onclick=\"$('#" + evDivId + "').toggle();toggleEvDivInd($(this));\" " +
-                "title=\"View evidence\" class=\"button tiny evidIndToggle\">" + evArray.length +
-                "&nbsp;&nbsp;<i class=\"fa fa-chevron-right\"></i></a>";
             evDiv = buildCompetencyDetailsModalEvidenceDiv(evDivId, as, evArray);
         }
         sourceAsLi.html(sourceAsLiHtml);
@@ -1502,10 +1504,9 @@ function scrollToCompInListView(compName) {
 function generateCompetencyLineItemHtmlForListView(cpd, comp, frameworkName, hasChildren) {
     var asArray = getAssertionsForCompetencyPacketData(cpd);
     var conf = determineConfidenceForAssertions(asArray);
-    var liHtml = "<span class=\"competency-type\">" +
-        "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" +
-        "<i class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\"></i></a>" +
-        "&nbsp;&nbsp;&nbsp;" +
+    var confidenceValue = conf * 100;
+    var liHtml = 
+        "<span class=\"competency-type\">" + "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" + "<span class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\">"  + confidenceValue +  "</span></a>"  + "&nbsp;&nbsp;&nbsp;" +
         "<a onclick=\"showCompetencyDetailsModal('" + escapeSingleQuote(comp.getId().trim()) + "');\">" +
         "<i class=\"fa fa-info-circle\" title=\"Show more details\" aria-hidden=\"true\"></i></a></span>" +
         "<h4 class=\"title\">";
@@ -1631,28 +1632,44 @@ function buildGraphSidebarEvidenceDiv(evDivId, as, evArray) {
     evDiv.append(evUl);
     return evDiv;
 }
+ 
+function toggleSourceAssertions(sourceName, el) {
+    console.log("source", sourceName);
+  $("#circleFocusDetailsAssertionListContainer ." + sourceName).toggle();
+  if($(el).find("i").hasClass("fa-chevron-right")) {
+     $(el).find("i").removeClass('fa-chevron-right').addClass('fa-chevron-down');
+  } else {
+    $(el).find("i").removeClass('fa-chevron-down').addClass('fa-chevron-right');
+  }
+ 
+}
 
 function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
-    $(CIR_FCS_DTL_ASR_LIST_CTR).append("<span class=\"cirAsrSource\">" + sourceName + "</span>");
+    var sourceNamed = sourceName.replace(/\s/g,'');
+    $(CIR_FCS_DTL_ASR_LIST_CTR)
+      .append("<span onclick='toggleSourceAssertions(\""+sourceNamed+"\", this);' class=\"cirAsrSource\">" + sourceName +  
+              "<i  class=\"cirAsrSourceExpand fa fa-chevron-down\"></i></span>"); 
     var sourceUl = $("<ul/>");
+    sourceUl.addClass(sourceNamed);
+    console.log("source name", sourceNamed);
     $(sourceAssertionArray).each(function (i, as) {
         var sourceAsLi = $("<li/>");
         sourceAsLi.addClass("cirAsrText");
-        var sourceAsLiHtml = "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\">...claims subject ";
+        sourceAsLi.addClass(sourceNamed);
+        var sourceAsLiHtml = buildConfidenceIcon(as.confidence);
+      
+        sourceAsLiHtml += "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\"";
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
         if (isNegativeAssertion) sourceAsLiHtml += "does not hold ";
         else sourceAsLiHtml += "holds ";
         sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
-        sourceAsLiHtml += buildConfidenceIcon(as.confidence);
+        
         sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
         sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
         var evArray = getEvidenceForAssertion(as);
         var evDiv = null;
         if (evArray && evArray.length > 0) {
             var evDivId = buildIDableString(as.shortId() + "_evdiv_csr");
-            sourceAsLiHtml += "&nbsp;&nbsp;<a onclick=\"$('#" + evDivId + "').toggle();toggleEvDivInd($(this));\" " +
-                "title=\"View evidence\" class=\"button tiny evidIndToggle\">" + evArray.length +
-                "&nbsp;&nbsp;<i class=\"fa fa-chevron-right\"></i></a>";
             evDiv = buildGraphSidebarEvidenceDiv(evDivId, as, evArray);
         }
         sourceAsLi.html(sourceAsLiHtml);
@@ -1740,8 +1757,8 @@ function expandGraphViewSummaryToObject(expObj) {
         expObj.attr("style", "display:block");
         if (expObj.parent().children().eq(1) && expObj.parent().children().eq(1).find("i:first")) {
             var ic = expObj.parent().children().eq(0).find("i:first");
-            if (ic && (ic.hasClass("fa-chevron-circle-down") || ic.hasClass("fa-chevron-circle-right"))) {
-                ic.attr("class", "fa fa-chevron-circle-down");
+            if (ic && (ic.hasClass("fa-chevron-down") || ic.hasClass("fa-chevron-right"))) {
+                ic.attr("class", "fa fa-chevron-down");
             }
         }
         if (expObj.parent() && expObj.parent().parent()) {
@@ -1771,18 +1788,18 @@ function scrollToNameInGraphViewSummary(name) {
 }
 
 function toggleGraphProfileSummaryChild(ce) {
-    if (ce.find('i:first').hasClass("fa-chevron-circle-right")) {
-        ce.find('i:first').attr("class", "fa fa-chevron-circle-down");
+    if (ce.find('i:first').hasClass("fa-chevron-right")) {
+        ce.find('i:first').attr("class", "fa fa-chevron-down");
         ce.parent().find('ul:first').attr("style", "display:block");
     } else {
-        ce.find('i:first').attr("class", "fa fa-chevron-circle-right");
+        ce.find('i:first').attr("class", "fa fa-chevron-right");
         ce.parent().find('ul:first').attr("style", "display:none");
     }
 }
 
 function generateCompetencyLineItemHtmlForGraphProfileSummary(comp, hasChildren) {
     var liHtml = "";
-    if (hasChildren) liHtml += "<a onclick=\"toggleGraphProfileSummaryChild($(this))\"><i class=\"fa fa-chevron-circle-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>";
+    if (hasChildren) liHtml += "<a onclick=\"toggleGraphProfileSummaryChild($(this))\"><i class=\"fa fa-chevron-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>";
     else liHtml += "<i class=\"fa fa-circle " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i>";
     liHtml += "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(comp.getName().trim()) + "_psi" + "\" " +
         "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(comp.getId().trim()) + "',true)\">" + comp.getName().trim() + "</a>";
@@ -1870,7 +1887,7 @@ function addFrameworkCategoryToGraphProfileSummary(categoryName, fwArray) {
     $(fwArray).each(function (i, fw) {
         var fwLi = $("<li/>");
         var fwLiHtml = "<a onclick=\"toggleGraphProfileSummaryChild($(this))\">" +
-            "<i class=\"fa fa-chevron-circle-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>" +
+            "<i class=\"fa fa-chevron-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>" +
             "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(fw.name.trim()) + "_psi" + "\" " +
             "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(fw.shortId().trim()) + "',true)\">" +
             fw.name.trim() + "</a>";
