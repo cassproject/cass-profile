@@ -196,7 +196,7 @@ function isFrameworkIdOrProfileUser(id) {
 function getFrameworkName(frameworkId) {
     if (profileUserName && profileUserName != null && frameworkId == profileUserName) return profileUserName;
     if (!applicableFrameworkMap[frameworkId] || applicableFrameworkMap[frameworkId] == null) return null;
-    return applicableFrameworkMap[frameworkId].name.trim();
+    return applicableFrameworkMap[frameworkId].getName().trim();
 }
 
 function getFrameworkDescription(frameworkId) {
@@ -205,7 +205,7 @@ function getFrameworkDescription(frameworkId) {
         else return PROFILE_DESCRIPTION_OTHER;
     }
     if (!applicableFrameworkMap[frameworkId] || applicableFrameworkMap[frameworkId] == null) return null;
-    return applicableFrameworkMap[frameworkId].description.trim();
+    return applicableFrameworkMap[frameworkId].getDescription().trim();
 }
 
 function getFrameworksForCompetency(competencyId) {
@@ -236,7 +236,7 @@ function buildCassEditorFrameworkHyperlinkListForCompetency(competencyId) {
     var retHtml = "";
     for (var i = 0; i < fwa.length; i++) {
         var fw = fwa[i];
-        retHtml += generateAnchorLink("https://cassproject.github.io/cass-editor/?frameworkId=" + fw.shortId() + "&view=true", fw.name, fw.name);
+        retHtml += generateAnchorLink("https://cassproject.github.io/cass-editor/?frameworkId=" + fw.shortId() + "&view=true", fw.getName(), fw.getName());
         if (i < (fwa.length - 1)) retHtml += ", ";
     }
     return retHtml;
@@ -248,7 +248,7 @@ function buildFrameworkExplorerFrameworkHyperlinkListForCompetency(competencyId)
     var retHtml = "";
     for (var i = 0; i < fwa.length; i++) {
         var fw = fwa[i];
-        retHtml += "<a onclick=\"openFrameworkExplorer('" + fw.shortId() + "');\">" + escapeSingleQuote(fw.name) + "</a>"
+        retHtml += "<a onclick=\"openFrameworkExplorer('" + fw.shortId() + "');\">" + escapeSingleQuote(fw.getName()) + "</a>"
         if (i < (fwa.length - 1)) retHtml += ", ";
     }
     return retHtml;
@@ -266,7 +266,7 @@ function buildHyperlinkListForCompetency(competencyId) {
         for (var i = 0; i < fwa.length; i++) {
             var fw = fwa[i];
             var linkHref = "https://cassproject.github.io/cass-editor/?frameworkId=" + fw.shortId() + "&competencyId=" + competencyId + "&view=true";
-            var linkName = compName + "(" + fw.name + ")";
+            var linkName = compName + "(" + fw.getName() + ")";
             retHtml += generateAnchorLink(linkHref, linkName, linkName);
             if (i < (fwa.length - 1)) retHtml += ", ";
         }
@@ -1903,7 +1903,7 @@ function buildGraphProfileSummaryFrameworkCategories() {
     $(CIR_FCS_SUM_LIST_CTR).empty();
     frameworkGraphSummaryLiMap = {};
     applicableFrameworkList.sort(function (a, b) {
-        return a.name.localeCompare(b.name);
+        return a.getName().localeCompare(b.getName());
     });
     var frameworkCategories = categorizeFrameworksForSummary();
     for (var category in frameworkCategories) {
@@ -2085,10 +2085,10 @@ function collapseApplicableFrameworks() {
 // Framework Fetching
 //**************************************************************************************************
 
-//TODO cleanFrameworkName expand on or get rid of
-function cleanFrameworkName(fw) {
-    fw.name = fw.name.replace("CAP ", "");
-}
+// //TODO cleanFrameworkName expand on or get rid of
+// function cleanFrameworkName(fw) {
+//     fw.name = fw.name.replace("CAP ", "");
+// }
 
 function filterApplicableFrameworks() {
     debugMessage("filterApplicableFrameworks");
@@ -2096,7 +2096,7 @@ function filterApplicableFrameworks() {
     applicableFrameworkMap = {};
     for (var i = 0; i < rawApplicableFrameworkList.length; i++) {
         fw = rawApplicableFrameworkList[i];
-        cleanFrameworkName(fw);
+        //cleanFrameworkName(fw);
         if (!applicableFrameworkMap[fw.shortId()] || applicableFrameworkMap[fw.shortId()] == null) {
             applicableFrameworkMap[fw.shortId()] = fw;
             applicableFrameworkList.push(fw);
