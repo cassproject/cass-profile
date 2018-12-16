@@ -36,6 +36,7 @@
                                     <li id="displayedProfileTools">
                                         <a href="#">Tools</a>
                                         <ul class="menu vertical">
+                                            <li><a title="Trust Networks" onclick="openAssertionTrustNetworkModal();"><i class="fa fa-thumbs-up" aria-hidden="true"></i> Trust</a></li>
                                             <li><a title="Validate Claims" onclick="openProfileExpAssertionValidateModal();"><i class="fa fa-handshake-o" aria-hidden="true"></i> Validate</a></li>
                                             <li><a title="Print Framework"><i class="fa fa-print" aria-hidden="true"></i> Print</a></li>
                                             <li><a title="Export Framework"><i class="fa fa-download" aria-hidden="true"></i> Export</a></li>
@@ -227,6 +228,19 @@
     <!--END CONTENTS-->
 
     <!-- MODAL WINDOWS -->
+    <div class="tiny reveal" id="modal-asr-source-trust" data-reveal>
+        <h4><i class="fa fa-thumbs-up" aria-hidden="true"></i> Trust Network</h4>
+        <div id="asrSourceTrustListCtr">
+            <ul class="fa-ul" id="asrSourceTrustList"></ul>
+        </div>
+        <button onclick="saveAsrSourceTrustNetwork();" class="button">Save</button>
+        &nbsp;&nbsp;
+        <button data-close class="button secondary">Cancel</button>
+        <button class="close-button" data-close aria-label="Close reveal" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
     <div class="small reveal" id="modal-competency-confidence-info" data-reveal>
         <h3><i class="fa fa-info-circle" aria-hidden="true"></i> <span id="confDetailCompName"></span> Confidence</h3>
         <p class="confDetailDesc">CaSS has determined a confidence of <span id="confDetailConf"></span> using the following method:</p>

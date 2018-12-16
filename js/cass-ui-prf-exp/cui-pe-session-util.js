@@ -2,6 +2,8 @@
 // CASS UI Profile Explorer Session Functions
 //**************************************************************************************************
 
+const CASS_TRUST_NETWORK_LS_KEY = "cassTrustNetwork";
+
 //**************************************************************************************************
 // Variables
 
@@ -25,6 +27,34 @@ function contactDisplayObj(contact) {
     this.pk = contact.pk;
     this.pkPem = contact.pk.toPem();
     this.hide = false;
+}
+
+//**************************************************************************************************
+// Trust Network
+//**************************************************************************************************
+
+function fetchTrustNetworkFromLocalStorage() {
+    var tnoString = localStorage.getItem(CASS_TRUST_NETWORK_LS_KEY);
+    var nt = {};
+    if (!tnoString || tnoString.trim() == "") return nt;
+    try {
+        var tno = JSON.parse(tnoString);
+        return tno;
+    }
+    catch (e) {
+        return nt;
+    }
+}
+
+function saveTrustNetworkToLocalStorage(tno) {
+    if (tno) {
+        try {
+            localStorage.setItem(CASS_TRUST_NETWORK_LS_KEY,JSON.stringify(tno));
+        }
+        catch (e) {
+            localStorage.removeItem(CASS_TRUST_NETWORK_LS_KEY);
+        }
+    }
 }
 
 //**************************************************************************************************

@@ -159,6 +159,11 @@ const CONF_DTL_CONF = "#confDetailConf";
 const CONF_DTL_EXP = "#confDetailExplanation";
 const CONF_DTL_ASR_LIST = "#confDetailList";
 
+// Assertion Source Trust Network Modal
+const ASR_SRC_TRST_MODAL = "#modal-asr-source-trust";
+const ASR_SRC_TRST_LIST_CTR = "#asrSourceTrustListCtr";
+const ASR_SRC_TRST_LIST = "#asrSourceTrustList";
+
 
 //**************************************************************************************************
 // Variables
@@ -286,6 +291,17 @@ if ( typeof String.prototype.endsWith != 'function' ) {
         return str.length > 0 && this.substring( this.length - str.length, this.length ) === str;
     }
 };
+
+function generatePercentFromNumber(n) {
+    if (n) {
+        if (n == 0) return "0%";
+        else {
+            var tp = Math.round(n * 100);
+            return tp + "%";
+        }
+    }
+    else return "0%";
+}
 
 //**************************************************************************************************
 // Profile Explorer Page UI Functions

@@ -22,8 +22,6 @@
 
 //TODO Investigate MAX_ASSR_SEARCH_SIZE further
 
-//TODO getConfidenceInAssertionSource expand on this
-
 //TODO buildConfidenceExplanation check if a single claim is negative
 
 //TODO Handle Same Competency IDs across multiple frameworks
@@ -41,6 +39,8 @@ const PROFILE_DESCRIPTION_OWN = "The following areas of knowledge, skills, and a
 const PROFILE_DESCRIPTION_OTHER = "The following areas of knowledge, skills, and abilities were determined for this user based on all evidence currently available to CaSS and visible to you:";
 
 const CREATE_IMPLIED_RELATIONS = true;
+
+const DEFAULT_ASR_SOURCE_TRUST = 1;
 
 //**************************************************************************************************
 // Variables
@@ -65,7 +65,10 @@ var competencyAssertionMap = {};
 var assertionEvidenceMap = {};
 var badgeList = [];
 var degreeCertList = [];
-var assertionSourceMap = {};
+var assertionSourceNameMap = {};
+var assertionSourcePkPemMap = {};
+var assertionSourceList = [];
+var assertionSourceTrustNetwork = {};
 var assertionNegativeMap = {};
 var competencyFrameworkMap = {};
 var frameworkGraphSummaryLiMap = {};
@@ -97,6 +100,8 @@ var profileDisplayHelperData;
 var profileD3NodeString;
 
 var profileToOpen;
+
+
 
 //**************************************************************************************************
 // Data Structures
@@ -297,9 +302,11 @@ function getConfidenceClass(confidence) {
 function determineConfidenceForAssertions(asArray) {
     var conf = 0;
     $(asArray).each(function (i, as) {
+        var asSourcePkPem = assertionSourcePkPemMap[as.shortId()];
+        var sourceConf = getConfidenceInAssertionSource(asSourcePkPem);
         var neg = assertionNegativeMap[as.shortId()];
-        if (neg) conf = conf - parseFloat(as.confidence);
-        else conf += parseFloat(as.confidence);
+        if (neg) conf = conf - (parseFloat(as.confidence) * sourceConf);
+        else conf += (parseFloat(as.confidence) * sourceConf);
     });
     conf = Math.round((conf / asArray.length) * 100);
     return conf / 100;
@@ -313,7 +320,7 @@ function divideAssertionsBySource(asArray) {
     var asBySource = {};
     for (var i = 0; i < asArray.length; i++) {
         var as = asArray[i];
-        var source = assertionSourceMap[as.shortId()];
+        var source = assertionSourceNameMap[as.shortId()];
         if (!asBySource[source] || asBySource[source] == null) {
             asBySource[source] = [];
         }
@@ -331,9 +338,20 @@ function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
 }
 
 function buildConfidenceIcon(confidence) {
-  var conf = confidence * 100;;
+  var conf = confidence * 100;
     var retHtml = "&nbsp;&nbsp;" +
         "<span class=\"" + CONF_CLASS_BASE + " badge " + getConfidenceClass(confidence) + "\">" + conf + "</span>";
+    return retHtml;
+}
+
+function buildConfidenceIconForAssertion(as) {
+    var asSourcePkPem = assertionSourcePkPemMap[as.shortId()];
+    var sourceConf = getConfidenceInAssertionSource(asSourcePkPem);
+    var conf = as.confidence * sourceConf;
+    var confStr = Math.round(conf * 100);
+    var htmlTitle = "Claim confidence (" + as.confidence + ") * Trust in claim source (" + sourceConf + ")";
+    var retHtml = "&nbsp;&nbsp;" +
+        "<span title=\"" + htmlTitle + "\" class=\"" + CONF_CLASS_BASE + " badge " + getConfidenceClass(conf) + "\">" + confStr + "</span>";
     return retHtml;
 }
 
@@ -407,9 +425,10 @@ function toDateString(dt) {
     return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
 }
 
-//TODO getConfidenceInAssertionSource expand on this
-function getConfidenceInAssertionSource(asr) {
-    return 1;
+function getConfidenceInAssertionSource(asrSourcePkPem) {
+    var conf = assertionSourceTrustNetwork[asrSourcePkPem];
+    if (conf) return conf;
+    else return DEFAULT_ASR_SOURCE_TRUST;
 }
 
 function openFrameworkExplorer(frameworkId) {
@@ -418,11 +437,88 @@ function openFrameworkExplorer(frameworkId) {
 
 function confidenceToPercentage(conf) {
     if (conf) {
-        var nconf = conf * 100;
+        var nconf = Math.round(conf * 100);
         return nconf + "%";
     }
     return "n/a";
 }
+
+//**************************************************************************************************
+// Assertion Source Trust Network Modal
+//**************************************************************************************************
+
+function getTrustValueFromInput(asi) {
+    var tv = $("#" + generateTrustNetworkPercId(asi)).val();
+    if (!tv || tv.trim() == "") return DEFAULT_ASR_SOURCE_TRUST;
+    else if (isNaN(Math.round(parseFloat(tv)))) return DEFAULT_ASR_SOURCE_TRUST;
+    else return Math.round(parseFloat(tv)) / 100;
+}
+
+function saveAsrSourceTrustNetwork() {
+    for (var i=0;i<assertionSourceList.length;i++) {
+        var asi = assertionSourceList[i];
+        assertionSourceTrustNetwork[asi.sourcePkPem] = getTrustValueFromInput(asi);
+    }
+    saveTrustNetworkToLocalStorage(assertionSourceTrustNetwork);
+    // hideCircleSidebarDetails();
+    // buildProfileDisplays();
+    if (lastExpCgSidebarD3NodeName != "") showCircleGraphSidebarDetails(lastExpCgSidebarD3NodeName);
+    $(ASR_SRC_TRST_MODAL).foundation('close');
+}
+
+function generateTrustNetworkPercId(asi) {
+    return buildIDableString(asi.sourcePkPem) + "_perc_inp";
+}
+
+function buildTrustNetworkSourceLineItem(asi) {
+    var asiLi = $("<li/>");
+    var asiLiDiv = $("<div/>");
+    asiLiDiv.addClass("grid-x");
+    var asiNameDiv = $("<div/>");
+    asiNameDiv.attr("title",asi.sourcePkPem);
+    asiNameDiv.addClass("cell small-12 boldText");
+    asiNameDiv.html(asi.sourceName);
+    var trust = Math.round(getConfidenceInAssertionSource(asi.sourcePkPem) * 100);
+    debugMessage("trust:" + trust);
+    var percId = generateTrustNetworkPercId(asi);
+    var asiTrstSldrOuterCtr = $("<div/>");
+    asiTrstSldrOuterCtr.addClass("cell small-12");
+    var asiTrstSldrCtrDiv = $("<div/>");
+    asiTrstSldrCtrDiv.addClass("grid-x grid-margin-x");
+    var asiSldrDiv = $("<div/>");
+    asiSldrDiv.addClass("cell small-9");
+    asiSldrDiv.html("<div class=\"slider\" data-slider data-initial-start=\"" + trust + "\" data-step=\"1\">" +
+        "<span class=\"slider-handle\"  data-slider-handle role=\"slider\" tabindex=\"1\" aria-controls=\"" + percId + "\"></span>" +
+        "<span class=\"slider-fill\" data-slider-fill></span>\n" +
+        "</div>");
+    var asiPercDiv = $("<div/>");
+    asiPercDiv.addClass("cell small-3");
+    asiPercDiv.html("<input type=\"number\" id=\"" + percId + "\">");
+    asiTrstSldrCtrDiv.append(asiSldrDiv);
+    asiTrstSldrCtrDiv.append(asiPercDiv);
+    asiTrstSldrOuterCtr.append(asiTrstSldrCtrDiv);
+    asiLiDiv.append(asiNameDiv);
+    asiLiDiv.append(asiTrstSldrOuterCtr);
+    asiLi.append(asiLiDiv);
+    $(ASR_SRC_TRST_LIST).append(asiLi);
+}
+
+function buildTrustNetworkDisplay() {
+    $(ASR_SRC_TRST_LIST).empty();
+    for (var i=0;i<assertionSourceList.length;i++) {
+        buildTrustNetworkSourceLineItem(assertionSourceList[i]);
+    }
+}
+
+function openAssertionTrustNetworkModal() {
+    hideModalBusy(ASR_SRC_TRST_MODAL);
+    hideModalError(ASR_SRC_TRST_MODAL);
+    enableModalInputsAndButtons();
+    buildTrustNetworkDisplay();
+    $(ASR_SRC_TRST_MODAL).foundation();
+    $(ASR_SRC_TRST_MODAL).foundation('open');
+}
+
 
 //**************************************************************************************************
 // Confidence Details Modal
@@ -436,7 +532,7 @@ function addSourceAssertionsToConfidenceDetailList(source,sourceAssertionArray,c
     $(sourceAssertionArray).each(function (i, as) {
         confTracker["totalNumberAsr"]++;
         var sourceAsStmtHtml;
-        var confInAsrSource = getConfidenceInAssertionSource(source);
+        var confInAsrSource = getConfidenceInAssertionSource(assertionSourcePkPemMap[as.shortId()]);
         var totalAsrConf = as.confidence * confInAsrSource;
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
         if (isNegativeAssertion) {
@@ -686,7 +782,7 @@ function buildAssertionDetailsEvidenceList(assertionId, evArray) {
 
 function showAssertionDetailsModal(assertionId) {
     var as = assertionMap[assertionId];
-    $(ASR_DTL_SOURCE).html(assertionSourceMap[assertionId]);
+    $(ASR_DTL_SOURCE).html(assertionSourceNameMap[assertionId]);
     $(ASR_DTL_SUBJECT).html(profileUserName);
     var compName = getCompetencyOrFrameworkName(as.competency);
     $(ASR_DTL_COMP).html(buildHyperlinkListForCompetency(as.competency));
@@ -802,7 +898,7 @@ function addSourceAssertionsToCompetencyDetailsModal(sourceName, sourceAssertion
         else sourceAsLiHtml += "holds ";
         sourceAsLiHtml += "<strong>" + getCompetencyOrFrameworkName(as.competency) + "</strong></a>";
       
-        sourceAsLiHtml += buildConfidenceIcon(as.confidence);
+        sourceAsLiHtml += buildConfidenceIconForAssertion(as);
         sourceAsLiHtml + getCompetencyOrFrameworkName(as.competency) + "</a>";
         sourceAsLiHtml += buildAssertionValidIcon(as.shortId(),true);
         sourceAsLiHtml += buildAssertionShareIcon(as.shortId());
@@ -882,7 +978,7 @@ function generateAssertionDescriptionHtml(assertionShortId) {
     var asr = assertionMap[assertionShortId];
     if (!asr || asr == null) return "";
     var desc = "";
-    desc += "<strong>" + assertionSourceMap[assertionShortId] + "</strong>";
+    desc += "<strong>" + assertionSourceNameMap[assertionShortId] + "</strong>";
     desc += "<i> claims subject ";
     var isNegativeAssertion = assertionNegativeMap[assertionShortId];
     if (isNegativeAssertion) desc += "does not hold ";
@@ -896,7 +992,7 @@ function generateAssertionDescriptionSimpleHtml(assertionShortId) {
     var asr = assertionMap[assertionShortId];
     if (!asr || asr == null) return "";
     var desc = "";
-    desc += assertionSourceMap[assertionShortId];
+    desc += assertionSourceNameMap[assertionShortId];
     desc += " claims subject ";
     var isNegativeAssertion = assertionNegativeMap[assertionShortId];
     if (isNegativeAssertion) desc += "does not hold ";
@@ -1634,14 +1730,13 @@ function buildGraphSidebarEvidenceDiv(evDivId, as, evArray) {
 }
  
 function toggleSourceAssertions(sourceName, el) {
-    console.log("source", sourceName);
-  $("#circleFocusDetailsAssertionListContainer ." + sourceName).toggle();
-  if($(el).find("i").hasClass("fa-chevron-right")) {
-     $(el).find("i").removeClass('fa-chevron-right').addClass('fa-chevron-down');
-  } else {
-    $(el).find("i").removeClass('fa-chevron-down').addClass('fa-chevron-right');
-  }
- 
+    $("#circleFocusDetailsAssertionListContainer ." + sourceName).toggle();
+    if($(el).find("i").hasClass("fa-chevron-right")) {
+        $(el).find("i").removeClass('fa-chevron-right').addClass('fa-chevron-down');
+    }
+    else {
+        $(el).find("i").removeClass('fa-chevron-down').addClass('fa-chevron-right');
+    }
 }
 
 function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
@@ -1651,12 +1746,11 @@ function addSourceAssertionsToGraphSidebar(sourceName, sourceAssertionArray) {
               "<i  class=\"cirAsrSourceExpand fa fa-chevron-down\"></i></span>"); 
     var sourceUl = $("<ul/>");
     sourceUl.addClass(sourceNamed);
-    console.log("source name", sourceNamed);
     $(sourceAssertionArray).each(function (i, as) {
         var sourceAsLi = $("<li/>");
         sourceAsLi.addClass("cirAsrText");
         sourceAsLi.addClass(sourceNamed);
-        var sourceAsLiHtml = buildConfidenceIcon(as.confidence);
+        var sourceAsLiHtml = buildConfidenceIconForAssertion(as);
       
         sourceAsLiHtml += "<a title=\"Show details\" onclick=\"showAssertionDetailsModal('" + as.shortId() + "')\"";
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
@@ -2172,17 +2266,34 @@ function registerCredential(ev) {
         ev.type.toLowerCase() == "certification") degreeCertList.push(ev);
 }
 
-function buildAssertionMaps() {
+function generateAssertionSourceInfo(as) {
+    var asi = {};
+    asi.sourceName = as.getAgentName();
+    asi.sourcePkPem = as.getAgent().toPem();
+    return asi;
+}
+
+function buildAssertionData() {
     showPageAsBusy("Processing assertions (step 3 of 3)...");
     assertionMap = {};
     assertionEvidenceMap = {};
-    assertionSourceMap = {};
+    assertionSourceNameMap = {};
+    assertionSourcePkPemMap = {};
     assertionNegativeMap = {};
     badgeList = [];
     degreeCertList = [];
+    assertionSourceList = [];
+    var existingSources = {};
+    assertionSourceTrustNetwork = fetchTrustNetworkFromLocalStorage();
     $(assertionList).each(function (i, as) {
         assertionMap[as.shortId()] = as;
-        assertionSourceMap[as.shortId()] = as.getAgentName();
+        var asi = generateAssertionSourceInfo(as);
+        assertionSourceNameMap[as.shortId()] = asi.sourceName;
+        assertionSourcePkPemMap[as.shortId()]  = asi.sourcePkPem;
+        if (!existingSources.hasOwnProperty(asi.sourcePkPem)) {
+            assertionSourceList.push(asi);
+            existingSources[asi.sourcePkPem] = asi.sourcePkPem;
+        }
         assertionNegativeMap[as.shortId()] = as.getNegative();
         for (var i = 0; i < as.getEvidenceCount(); i++) {
             var evidenceStr = as.getEvidence(i);
@@ -2196,6 +2307,7 @@ function buildAssertionMaps() {
             }
         }
     });
+    assertionSourceList.sort(function (a, b) {return a.sourceName.localeCompare(b.sourceName);});
 }
 
 function handleNoAssertionsFound() {
@@ -2236,7 +2348,7 @@ function processRelevantAssertions() {
         });
         debugMessage(assertionList);
         buildCompetencyAssertionMaps();
-        buildAssertionMaps();
+        buildAssertionData();
         fetchAssertionCompetencyFrameworks();
     }
 }

@@ -432,6 +432,28 @@ input:checked~.switch-paddle {
 
 /* ---- MISC ---- */
 
+.trustNetworkPerc {
+    color:#999;
+}
+
+.trustNetworkSldr {
+    width:100%;
+}
+
+#asrSourceTrustListCtr {
+    margin-bottom:1.2rem;
+    max-height: 21rem;
+    overflow-y: auto;
+}
+
+#asrSourceTrustList div {
+    margin-right:0;
+}
+
+#asrSourceTrustList div.slider {
+    margin-right:1rem;
+}
+
 #confDetailExplanationCtr {
     padding: .5rem .8rem 0;
     margin-bottom: 1rem;
@@ -719,7 +741,7 @@ span.frameworkCategoryGraphSummaryName {
     margin-top: 1rem;
 }
 
-#circleFocusDetailsSidebar .cirAsrEvDiv a,  {
+#circleFocusDetailsSidebar .cirAsrEvDiv a  {
   font-weight: 500;
 }
 
@@ -795,7 +817,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #circleFocusSummaryListContainer ul {
- margin-left: .5 rem !important;
+ margin-left: .5rem !important;
 }
 
 #circleFocusRelatedFwListContainer {
