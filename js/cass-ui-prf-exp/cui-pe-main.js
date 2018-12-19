@@ -110,7 +110,7 @@ var profileToOpen;
 function newAssertionShareEnvelope(name) {
     this.name = name;
     this.assigned = true;
-    this.contacts = [];
+    this.readers = [];
 }
 
 function evidenceSource(name, type, source, evDate, expDate, link, assertionId, evIdx) {
@@ -399,7 +399,7 @@ function buildHashStringFromStringArray(strArray) {
 function checkForProfileUserSearchbarEnter(event) {
     if (event.which == 13 || event.keyCode == 13) {
         $(PROF_USR_SRCH_INPT).autocomplete("close");
-        setUpAndFetchAssertionsForSelectedUser($(PROF_USR_SRCH_INPT).val().trim());
+        setUpAndFetchAssertionsForSearchedUserByName($(PROF_USR_SRCH_INPT).val().trim());
     }
 }
 
@@ -956,20 +956,20 @@ function assertionIsPartOfEnvelope(assertionShortId,assertionEnvelopeId) {
     return false;
 }
 
-function contactIsAssignedToAssertionShareEnvelopeAssignmentTracker(contactPkPem,assertionEnvelopeId) {
+function readerIsAssignedToAssertionShareEnvelopeAssignmentTracker(readerPkPem,assertionEnvelopeId) {
     var aeat = assertionShareEnvelopeAssignmentTracker[assertionEnvelopeId];
-    if (!aeat["newContacts"] || aeat["newContacts"].length <= 0) return false;
-    for (var i=0;i<aeat["newContacts"].length;i++) {
-        if (aeat["newContacts"][i] == contactPkPem) return true;
+    if (!aeat["newReaders"] || aeat["newReaders"].length <= 0) return false;
+    for (var i=0;i<aeat["newReaders"].length;i++) {
+        if (aeat["newReaders"][i] == readerPkPem) return true;
     }
     return false;
 }
 
-function contactIsAssignedToNewAssertionShareEnvelope(contactPkPem,naseIdx) {
+function readerIsAssignedToNewAssertionShareEnvelope(readerPkPem,naseIdx) {
     var nase = newAssertionShareEnvelopeList[naseIdx];
-    if (!nase.contacts || nase.contacts.length <= 0) return false;
-    for (var i=0;i<nase.contacts.length;i++) {
-        if (nase.contacts[i] == contactPkPem) return true;
+    if (!nase.readers || nase.readers.length <= 0) return false;
+    for (var i=0;i<nase.readers.length;i++) {
+        if (nase.readers[i] == readerPkPem) return true;
     }
     return false;
 }
@@ -1013,7 +1013,7 @@ function assertionShareCancelCreatePortfolio() {
     }
 }
 
-function buildEnvelopeContactsIconForAssertionShare(aesi,naseIdx) {
+function buildEnvelopeReadersIconForAssertionShare(aesi,naseIdx) {
     var aesiParm;
     if (!aesi || aesi == null) aesiParm = "null";
     else aesiParm = "'" + aesi + "'";
@@ -1021,7 +1021,7 @@ function buildEnvelopeContactsIconForAssertionShare(aesi,naseIdx) {
     if (naseIdx == 0) naseIdxParm = 0;
     else if (!naseIdx || naseIdx == null) naseIdxParm = "null";
     else naseIdxParm = naseIdx;
-    var ciHtml = "<a  title=\"Manage portfolio contacts\" onclick=\"managePortfolioContactsForAssertionShare(" + aesiParm + "," + naseIdxParm + ");\" ";
+    var ciHtml = "<a  title=\"Manage portfolio readers\" onclick=\"managePortfolioReadersForAssertionShare(" + aesiParm + "," + naseIdxParm + ");\" ";
     ciHtml += "class=\"portfolioContentsIcon\"><i class=\"fa fa-users\"></i></a>";
     return ciHtml;
 }
@@ -1080,7 +1080,7 @@ function buildAssertionSharePortfolioListLineItem(prtName,checkBoxId,checked,aes
     glLiHtml += buildEnvelopeAssertionContentsIconForAssertionShare(aesi);
     glLiHtml += "</div>";
     glLiHtml += "<div class=\"cell small-1\">";
-    glLiHtml += buildEnvelopeContactsIconForAssertionShare(aesi,naseIdx);
+    glLiHtml += buildEnvelopeReadersIconForAssertionShare(aesi,naseIdx);
     glLiHtml += "</div>";
     glLiHtml += "</div>";
     glLi.html(glLiHtml);
@@ -1124,8 +1124,8 @@ function initAssertionShareEnvelopeTracker(assertionShortId) {
         assertionShareEnvelopeAssignmentTracker[aeShortId]["name"] = assertionEnvelopeList[i].name;
         assertionShareEnvelopeAssignmentTracker[aeShortId]["initialAssigned"] = isAssigned;
         assertionShareEnvelopeAssignmentTracker[aeShortId]["newAssigned"] = isAssigned;
-        assertionShareEnvelopeAssignmentTracker[aeShortId]["initialContacts"] = assertionEnvelopeList[i].reader;
-        assertionShareEnvelopeAssignmentTracker[aeShortId]["newContacts"] = assertionEnvelopeList[i].reader;
+        assertionShareEnvelopeAssignmentTracker[aeShortId]["initialReaders"] = assertionEnvelopeList[i].reader;
+        assertionShareEnvelopeAssignmentTracker[aeShortId]["newReaders"] = assertionEnvelopeList[i].reader;
     }
 }
 
@@ -1283,58 +1283,58 @@ function removeAssertionFromAssertionEnvelope(assertionShortId,assertionEnvelope
     }
 }
 
-function assertionShareCancelPortfolioContactsAssignment() {
+function assertionShareCancelPortfolioReadersAssignment() {
     hideModalError(ASR_SHARE_MODAL);
     hideModalBusy(ASR_SHARE_MODAL);
-    $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
+    $(ASR_SHARE_PRTF_RDRS_CTR).hide();
     $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
 }
 
-function assertionShareApplyPortfolioContactsForAesi(aesi) {
+function assertionShareApplyPortfolioReadersForAesi(aesi) {
     var aeat = assertionShareEnvelopeAssignmentTracker[aesi];
     if (!aeat || aeat == null) return;
-    aeat["newContacts"] = [];
-    for (var i=0;i<contactDisplayList.length;i++) {
-        var cdo = contactDisplayList[i];
-        if (cdo.pkPem != loggedInPkPem && !cdo.hide){
-            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(cdo.pkPem);
+    aeat["newReaders"] = [];
+    for (var i=0;i<viewableProfileList.length;i++) {
+        var po = viewableProfileList[i];
+        if (po.pkPem != loggedInPkPem){
+            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(po.pkPem);
             var isAssigned = $("#" + checkBoxId).prop("checked");
-            if (isAssigned) aeat["newContacts"].push(cdo.pkPem);
+            if (isAssigned) aeat["newReaders"].push(po.pkPem);
         }
     }
 }
 
-function assertionShareApplyPortfolioContactsForNaseIdx(naseIdx) {
+function assertionShareApplyPortfolioReadersForNaseIdx(naseIdx) {
     var nase = newAssertionShareEnvelopeList[naseIdx];
     if (!nase || nase == null) return;
-    nase.contacts = [];
-    for (var i=0;i<contactDisplayList.length;i++) {
-        var cdo = contactDisplayList[i];
-        if (cdo.pkPem != loggedInPkPem && !cdo.hide){
-            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(cdo.pkPem);
+    nase.readers = [];
+    for (var i=0;i<viewableProfileList.length;i++) {
+        var po = viewableProfileList[i];
+        if (po.pkPem != loggedInPkPem){
+            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(po.pkPem);
             var isAssigned = $("#" + checkBoxId).prop("checked");
-            if (isAssigned) nase.contacts.push(cdo.pkPem);
+            if (isAssigned) nase.readers.push(po.pkPem);
         }
     }
 }
 
-function assertionShareApplyPortfolioContacts() {
-    var prtType = $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE).val();
+function assertionShareApplyPortfolioReaders() {
+    var prtType = $(ASR_SHARE_PRTF_RDRS_PRTF_TYPE).val();
     if ("aesi" == prtType) {
-        var aesi = $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val();
-        assertionShareApplyPortfolioContactsForAesi(aesi);
+        var aesi = $(ASR_SHARE_PRTF_RDRS_PRTF_TYPE_LKP).val();
+        assertionShareApplyPortfolioReadersForAesi(aesi);
     }
     else {
-        var naseIdx = $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val();
-        assertionShareApplyPortfolioContactsForNaseIdx(naseIdx);
+        var naseIdx = $(ASR_SHARE_PRTF_RDRS_PRTF_TYPE_LKP).val();
+        assertionShareApplyPortfolioReadersForNaseIdx(naseIdx);
     }
     hideModalError(ASR_SHARE_MODAL);
     hideModalBusy(ASR_SHARE_MODAL);
-    $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
+    $(ASR_SHARE_PRTF_RDRS_CTR).hide();
     $(ASR_SHARE_ASSIGN_PRTF_CTR).show();
 }
 
-function buildAssertionShareContactAssignmentLineItem(cntName,checkBoxId,checked) {
+function buildAssertionShareReaderAssignmentLineItem(cntName,checkBoxId,checked) {
     var cntLi = $("<li/>");
     var cntLiHtml = "<input id=\"" + checkBoxId + "\" type=\"checkbox\"";
     if (checked) cntLiHtml += " checked ";
@@ -1344,54 +1344,57 @@ function buildAssertionShareContactAssignmentLineItem(cntName,checkBoxId,checked
     return cntLi;
 }
 
-function buildContactListForMangePortfolioContactsAssertionShare(aesi,naseIdx) {
-    $(ASR_SHARE_PRTF_CONTACTS_LIST).empty();
-    for (var i=0;i<contactDisplayList.length;i++) {
-        var cdo = contactDisplayList[i];
-        if (cdo.pkPem != loggedInPkPem && !cdo.hide){
-            var cntName = cdo.displayName;
-            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(cdo.pkPem);
+function buildReaderListForMangePortfolioReadersAssertionShare(aesi,naseIdx) {
+    $(ASR_SHARE_PRTF_RDRS_LIST).empty();
+    for (var i=0;i<viewableProfileList.length;i++) {
+        var po = viewableProfileList[i];
+        if (po.pkPem != loggedInPkPem){
+            var cntName = po.displayName;
+            var checkBoxId = ASR_SHARE_ASGN_CONT_CB_ID_PREFIX + buildIDableString(po.pkPem);
             var checked = false;
-            if (aesi && aesi != null) checked = contactIsAssignedToAssertionShareEnvelopeAssignmentTracker(cdo.pkPem,aesi);
-            else checked = contactIsAssignedToNewAssertionShareEnvelope(cdo.pkPem,naseIdx);
-            var cntLi = buildAssertionShareContactAssignmentLineItem(cntName,checkBoxId,checked);
-            $(ASR_SHARE_PRTF_CONTACTS_LIST).append(cntLi);
+            if (aesi && aesi != null) checked = readerIsAssignedToAssertionShareEnvelopeAssignmentTracker(po.pkPem,aesi);
+            else checked = readerIsAssignedToNewAssertionShareEnvelope(po.pkPem,naseIdx);
+            var cntLi = buildAssertionShareReaderAssignmentLineItem(cntName,checkBoxId,checked);
+            $(ASR_SHARE_PRTF_RDRS_LIST).append(cntLi);
         }
     }
 }
 
-function addPortfolioNameForMangePortfolioContactsAssertionShare(aesi,naseIdx) {
+function addPortfolioNameForMangePortfolioReadersAssertionShare(aesi,naseIdx) {
     var prtfName = "UNKNOWN";
     if (aesi && aesi != null) {
         prtfName = assertionEnvelopeMap[aesi].name;
-        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE).val("aesi");
-        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val(aesi);
+        $(ASR_SHARE_PRTF_RDRS_PRTF_TYPE).val("aesi");
+        $(ASR_SHARE_PRTF_RDRS_PRTF_TYPE_LKP).val(aesi);
     }
     else {
         prtfName = newAssertionShareEnvelopeList[naseIdx].name;
-        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE).val("naseIdx");
-        $(ASR_SHARE_PRTF_CONTACTS_PRTF_TYPE_LKP).val(naseIdx);
+        $(ASR_SHARE_PRTF_RDRS_PRTF_TYPE).val("naseIdx");
+        $(ASR_SHARE_PRTF_RDRS_PRTF_TYPE_LKP).val(naseIdx);
     }
-    $(ASR_SHARE_PRTF_CONTACTS_PRTF_NAME).html(prtfName);
+    $(ASR_SHARE_PRTF_RDRS_PRTF_NAME).html(prtfName);
 }
 
-function managePortfolioContactsForAssertionShare(aesi,naseIdx) {
+function managePortfolioReadersForAssertionShare(aesi,naseIdx) {
     if ((!aesi || aesi == null) && (!naseIdx && naseIdx == null)) return;
-    addPortfolioNameForMangePortfolioContactsAssertionShare(aesi,naseIdx);
-    buildContactListForMangePortfolioContactsAssertionShare(aesi,naseIdx);
+    addPortfolioNameForMangePortfolioReadersAssertionShare(aesi,naseIdx);
+    buildReaderListForMangePortfolioReadersAssertionShare(aesi,naseIdx);
     hideModalError(ASR_SHARE_MODAL);
     hideModalBusy(ASR_SHARE_MODAL);
     $(ASR_SHARE_ASSIGN_PRTF_CTR).hide();
-    $(ASR_SHARE_PRTF_CONTACTS_CTR).show();
+    $(ASR_SHARE_PRTF_RDRS_CTR).show();
 }
 
 function removeAllAssertionEnvelopeReaders(ae) {
     if (!ae.reader || ae.reader == null || ae.reader.length == 0) return;
     var pksToRemove = [];
     for (var i=0;i<ae.reader.length;i++) {
-        var pk = contactsByPkPemMap[ae.reader[i]].pk;
-        if (pk && pk != null) {
-            pksToRemove.push(pk);
+        var po = viewableProfileByPkPemMap[ae.reader[i]];
+        if (po) {
+            var pk = po.pk;
+            if (pk && pk != null) {
+                pksToRemove.push(pk);
+            }
         }
     }
     for (var i=0;i<pksToRemove.length;i++) {
@@ -1404,9 +1407,12 @@ function synchAssertionEnvelopeReadersFromTracker(assertionEnvelopeId) {
     if (ae && ae != null) {
         var aeat = assertionShareEnvelopeAssignmentTracker[assertionEnvelopeId];
         removeAllAssertionEnvelopeReaders(ae);
-        for (var i=0;i<aeat["newContacts"].length;i++) {
-            var pk = contactsByPkPemMap[aeat["newContacts"][i]].pk;
-            ae.addReader(pk);
+        for (var i=0;i<aeat["newReaders"].length;i++) {
+            var po = viewableProfileByPkPemMap[aeat["newReaders"][i]];
+            if (po) {
+                var pk = po.pk;
+                ae.addReader(pk);
+            }
         }
         assertionEnvelopeListToSave[assertionEnvelopeId] = ae;
     }
@@ -1421,19 +1427,21 @@ function saveChangedExistingEnvelopesForAssertionShare() {
                 if (newAssigned) addAssertionToAssertionEnvelope(currentAssertionShareId,aesi);
                 else if (!newAssigned) removeAssertionFromAssertionEnvelope(currentAssertionShareId,aesi);
             }
-            var initialContactsHash = buildHashStringFromStringArray(assertionShareEnvelopeAssignmentTracker[aesi]["initialContacts"]);
-            var newContactsHash = buildHashStringFromStringArray(assertionShareEnvelopeAssignmentTracker[aesi]["newContacts"]);
-            if (initialContactsHash != newContactsHash) {
+            var initialReadearsHash = buildHashStringFromStringArray(assertionShareEnvelopeAssignmentTracker[aesi]["initialReaders"]);
+            var newReadersHash = buildHashStringFromStringArray(assertionShareEnvelopeAssignmentTracker[aesi]["newReaders"]);
+            if (initialReadearsHash != newReadersHash) {
                 synchAssertionEnvelopeReadersFromTracker(aesi);
             }
         }
     }
 }
 
-function addAssertionReadersFromNewAssertionShareEnvelopContacts(ae,nase) {
-    for (var j=0;j<nase.contacts.length;j++) {
-        var ct = contactsByPkPemMap[nase.contacts[j]];
-        ae.addReader(ct.pk);
+function addAssertionReadersFromNewAssertionShareEnvelopReaders(ae,nase) {
+    for (var j=0;j<nase.readers.length;j++) {
+        var po = viewableProfileByPkPemMap[nase.readers[j]];
+        if (po) {
+            ae.addReader(po.pk);
+        }
     }
 }
 
@@ -1448,7 +1456,7 @@ function createNewEnvelopesForAssertionShare() {
                 newAe.name = nase.name;
                 newAe.addAssertion(asr);
                 newAe.addOwner(EcIdentityManager.ids[0].ppk.toPk());
-                addAssertionReadersFromNewAssertionShareEnvelopContacts(newAe,nase);
+                addAssertionReadersFromNewAssertionShareEnvelopReaders(newAe,nase);
                 newAe.generateId(repo.selectedServer);
                 assertionEnvelopeListToSave[newAe.shortId()] = newAe;
             }
@@ -1496,7 +1504,7 @@ function shareAssertion(assertionShortId) {
     hideModalError(ASR_SHARE_MODAL);
     hideModalBusy(ASR_SHARE_MODAL);
     enableModalInputsAndButtons();
-    $(ASR_SHARE_PRTF_CONTACTS_CTR).hide();
+    $(ASR_SHARE_PRTF_RDRS_CTR).hide();
     $(ASR_SHARE_CREATE_PRTF_NAME).val("");
     newAssertionShareEnvelopeList = [];
     currentAssertionShareId = assertionShortId;
@@ -2493,13 +2501,13 @@ function setProfileUserAsLoggedInUserAndGo() {
 }
 
 function setProfileUserAndGo(profilePem) {
-    var ct = contactsByPkPemMap[profilePem];
-    if (ct) {
+    var po = viewableProfileByPkPemMap[profilePem];
+    if (po) {
         hideProfileUserSearchContainer();
-        setUpProfileUserAndFetchAssertions(ct.displayName, profilePem);
+        setUpProfileUserAndFetchAssertions(po.displayName, profilePem);
     }
     else {
-        debugMessage("setProfileUserAndGo: could not locate contact info for: " + profilePem);
+        debugMessage("setProfileUserAndGo: could not locate person info for: " + profilePem);
         setUpForProfileUserSearch();
     }
 }
@@ -2514,20 +2522,33 @@ function setUpForProfileUserSearch() {
 // Profile User Search Auto Complete
 //**************************************************************************************************
 
-function setUpAndFetchAssertionsForSelectedUser(selectedValue) {
-    if (contactsByNameMap.hasOwnProperty(selectedValue)) {
-        var ct = contactsByNameMap[selectedValue];
+function setUpAndFetchAssertionsForSearchedUserByName(searchedName) {
+    if (viewableProfileByNameMap.hasOwnProperty(searchedName)) {
+        var poa = viewableProfileByNameMap[searchedName];
+        if (poa && poa.length >= 1) {
+            var po = poa[0];
+            hideProfileUserSearchContainer();
+            setUpProfileUserAndFetchAssertions(po.displayName, po.pkPem);
+        }
+    }
+}
+
+function setUpAndFetchAssertionsForSearchedUserByPkPem(searchedPkPem) {
+    if (viewableProfileByPkPemMap.hasOwnProperty(searchedPkPem)) {
+        var po = viewableProfileByPkPemMap[searchedPkPem];
         hideProfileUserSearchContainer();
-        setUpProfileUserAndFetchAssertions(ct.displayName, ct.pk.toPem());
+        setUpProfileUserAndFetchAssertions(po.displayName, po.pkPem);
     }
 }
 
 function buildProfileUserSearchAutoCompleteData() {
     var data = [];
-    for (var contactName in contactsByNameMap) {
-        if (contactsByNameMap.hasOwnProperty(contactName)) {
-            data.push(contactName);
-        }
+    for (var i=0;i<viewableProfileList.length;i++) {
+        var po = viewableProfileList[i];
+        data.push({
+            label:po.displayName,
+            value:po.pkPem
+        });
     }
     return data;
 }
@@ -2536,7 +2557,13 @@ function fillInProfileUserSearchAutoComplete() {
     $(PROF_USR_SRCH_INPT).autocomplete({
         source: buildProfileUserSearchAutoCompleteData(),
         select: function (event, ui) {
-            setUpAndFetchAssertionsForSelectedUser(ui.item.label);
+            event.preventDefault();
+            $(PROF_USR_SRCH_INPT).val(ui.item.label);
+            setUpAndFetchAssertionsForSearchedUserByPkPem(ui.item.value);
+        },
+        focus: function(event, ui) {
+            event.preventDefault();
+            $(PROF_USR_SRCH_INPT).val(ui.item.label);
         }
     });
 }

@@ -393,7 +393,7 @@
     <div class="small reveal" id="modal-share-assertion" data-reveal>
         <h4><i class="fa fa-share-alt-square" aria-hidden="true"></i> Share Claim</span></h4>
         <p id="asrShareAssertionDesc"></p>
-        <p><span>To share a claim, it must be added to a portfolio.  Portfolios can then be shared with your contacts.</span></p>
+        <p><span>To share a claim, it must be added to a portfolio.  Portfolios can then be shared with other people.</span></p>
         <div id="asrShareCreatePortfolioContainer" style="display: none">
             <input type="text" id="asrShareCreatePortfolioName" placeholder="Portfolio name">
             <div class="grid-x">
@@ -419,20 +419,20 @@
                 </div>
             </div>
         </div>
-        <div id="asrSharePortfoliContactsContainer" style="display: none">
-            <h5 title="Assign portfolio contacts"><i class="fa fa-users" aria-hidden="true"></i> <span id="asrSharePortfoliContactsPortfolioName"></span></h5>
-            <div id="asrShareAssignPortfolioContactsListContainer">
-                <ul id="asrShareAssignPortfolioContactsList" class="no-bullets leftOffset25"></ul>
+        <div id="asrSharePortfolioReadersContainer" style="display: none">
+            <h5 title="Assign portfolio readers"><i class="fa fa-users" aria-hidden="true"></i> <span id="asrSharePortfolioReadersPortfolioName"></span></h5>
+            <div id="asrShareAssignPortfolioReadersListContainer">
+                <ul id="asrShareAssignPortfolioReadersList" class="no-bullets leftOffset25"></ul>
             </div>
             <div class="grid-x">
                 <div class="cell medium-12">
-                    <button id="asrSharePortfolioContactsApplyBtn" onclick="assertionShareApplyPortfolioContacts();" class="button">Assign</button>
+                    <button id="asrSharePortfolioReadersApplyBtn" onclick="assertionShareApplyPortfolioReaders();" class="button">Assign</button>
                     &nbsp;&nbsp;
-                    <button id="asrSharePortfolioContactsCancelBtn" onclick="assertionShareCancelPortfolioContactsAssignment();" class="button secondary">Cancel</button>
+                    <button id="asrSharePortfolioReadersCancelBtn" onclick="assertionShareCancelPortfolioReadersAssignment();" class="button secondary">Cancel</button>
                 </div>
             </div>
-            <input id="asrShareAssignPortfolioContactsPortfolioType" type="hidden">
-            <input id="asrShareAssignPortfolioContactsPortfolioTypeLookup" type="hidden">
+            <input id="asrShareAssignPortfolioReadersPortfolioType" type="hidden">
+            <input id="asrShareAssignPortfolioReadersPortfolioTypeLookup" type="hidden">
         </div>
         <div class="grid-x">
             <div class="cell cassUiModalBusyCtr" style="display:none">
@@ -466,6 +466,7 @@
     <script src="js/vendor/foundation.js"></script>
     <script src="js/vendor/d3.js"></script>
     <script src="js/cass/cass.min.js"></script>
+    <script src="js/cass/com.eduworks.schema.js"></script>
     <script src="js/cass-ui-prf-exp/cui-pe-ui-util.js"></script>
     <script src="js/cass-ui-prf-exp/cui-pe-tech-util.js"></script>
     <script src="js/cass-ui-prf-exp/cui-pe-session-util.js"></script>

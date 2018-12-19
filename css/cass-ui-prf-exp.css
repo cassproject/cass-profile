@@ -520,7 +520,7 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #asrValdResultsList,
-#asrShareAssignPortfolioContactsList {
+#asrShareAssignPortfolioReadersList {
     margin: .5rem 0;
 }
 
@@ -551,7 +551,7 @@ span.frameworkCategoryGraphSummaryName {
 
 #asrValdResultsListContainer,
 #asrShareAssignPortfolioListContainer,
-#asrShareAssignPortfolioContactsListContainer {
+#asrShareAssignPortfolioReadersListContainer {
     max-height: 300px;
     overflow-y: auto;
     margin: auto;
@@ -569,17 +569,17 @@ span.frameworkCategoryGraphSummaryName {
 }
 
 #asrShareAssignPortfolioListContainer ul,
-#asrShareAssignPortfolioContactsList ul {
+#asrShareAssignPortfolioReadersList ul {
     margin-bottom: 0;
 }
 
 #asrShareAssignPortfolioListContainer li label,
-#asrShareAssignPortfolioContactsList li label {
+#asrShareAssignPortfolioReadersList li label {
     font-size: 1.15rem;
 }
 
 #asrShareAssignPortfolioListContainer li input[type=checkbox],
-#asrShareAssignPortfolioContactsList li input[type=checkbox] {
+#asrShareAssignPortfolioReadersList li input[type=checkbox] {
     zoom: 1.2;
     margin: 0;
 }

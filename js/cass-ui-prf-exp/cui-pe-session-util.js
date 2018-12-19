@@ -4,6 +4,8 @@
 
 const CASS_TRUST_NETWORK_LS_KEY = "cassTrustNetwork";
 
+const MAX_PRS_SEARCH_SIZE = 10000;
+
 //**************************************************************************************************
 // Variables
 
@@ -14,19 +16,19 @@ var loggedInPk;
 var loggedInPkPem;
 var loggedInPpkPem;
 
-var contactsByNameMap;
-var contactsByPkPemMap = {};
-var contactDisplayList;
+var viewableProfileList;
+var viewableProfileByPkPemMap;
+var viewableProfileByNameMap;
+var viewableProfileByPersonIdMap;
 
 //**************************************************************************************************
 // Data Structures
 //**************************************************************************************************
 
-function contactDisplayObj(contact) {
-    this.displayName = contact.displayName;
-    this.pk = contact.pk;
-    this.pkPem = contact.pk.toPem();
-    this.hide = false;
+function viewableProfObj(name,pk) {
+    this.displayName = name;
+    this.pk = pk;
+    this.pkPem = pk.toPem();
 }
 
 //**************************************************************************************************
@@ -58,37 +60,67 @@ function saveTrustNetworkToLocalStorage(tno) {
 }
 
 //**************************************************************************************************
-// Contacts
+// Persons
 //**************************************************************************************************
-
-function buildContactDisplayList() {
-    contactDisplayList = [];
-    for (var cPkPem in contactsByPkPemMap) {
-        if (contactsByPkPemMap.hasOwnProperty(cPkPem)) {
-            var cdo = new contactDisplayObj(contactsByPkPemMap[cPkPem]);
-            //applySamanthaContactsDisplayFilter(cdo);
-            contactDisplayList.push(cdo);
+function getPersonObjectPk(po) {
+    var poPk = null;
+    var poFp = po.getFingerprint();
+    if (po.owner && po.owner.length > 0) {
+        for (var i=0;i<po.owner.length;i++) {
+            var testPk = EcPk.fromPem(po.owner[i]);
+            if (testPk.fingerprint() == poFp) {
+                poPk = testPk;
+                break;
+            }
         }
     }
-    if (contactDisplayList.length > 1) {
-        contactDisplayList.sort(function (a, b) {
-            return a.displayName.localeCompare(b.displayName);
-        });
-    }
+    return poPk;
 }
 
-function buildContactsMaps() {
-    contactsByNameMap = {};
-    contactsByPkPemMap = {};
-    for (var i = 0; i < EcIdentityManager.contacts.length; i++) {
-        contactsByNameMap[EcIdentityManager.contacts[i].displayName] = EcIdentityManager.contacts[i];
-        contactsByPkPemMap[EcIdentityManager.contacts[i].pk.toPem()] = EcIdentityManager.contacts[i];
+function buildViewableProfileData(ecpa) {
+    viewableProfileList = [];
+    viewableProfileByPkPemMap = {};
+    viewableProfileByPersonIdMap = {};
+    viewableProfileByNameMap = {};
+    for (var i=0;i<ecpa.length;i++) {
+        var po = ecpa[i];
+        var poPk = getPersonObjectPk(po);
+        if (poPk) {
+            var vpo = new viewableProfObj(getStringVal(po.getName()),poPk);
+            viewableProfileList.push(vpo);
+            viewableProfileByPkPemMap[vpo.pkPem] = vpo;
+            viewableProfileByPersonIdMap[po.shortId()] = vpo;
+            if (!viewableProfileByNameMap[po.getName()]) viewableProfileByNameMap[po.getName()] = [];
+            viewableProfileByNameMap[po.getName()].push(vpo);
+        }
     }
-    buildContactDisplayList();
+    viewableProfileList.sort(function (a, b) {return a.displayName.localeCompare(b.displayName);});
+}
+
+function handleFetchPersonsSuccess(ecpa,callback) {
+    debugMessage("handleFetchPersonsSuccess: " + ecpa.length);
+    buildViewableProfileData(ecpa);
+    callback();
+}
+
+function handleFetchPersonsFailure(err) {
+    debugMessage("handleFetchPersonsFailure: " + err);
+    showPageError("Could not fetch EcPerson list: " + err);
+}
+
+function identifyEcPersons(callback) {
+    debugMessage("Finding repo Person objects...");
+    EcPerson.search(repo,"",
+        function(ecpa){
+            handleFetchPersonsSuccess(ecpa,callback);
+        },
+        handleFetchPersonsFailure,
+        {'size':MAX_PRS_SEARCH_SIZE}
+    );
 }
 
 //**************************************************************************************************
-// Repository Intialization
+// Repository Initialization
 //**************************************************************************************************
 function initRepo() {
     debugMessage("Initializing repository...");
@@ -98,7 +130,7 @@ function initRepo() {
 }
 
 //**************************************************************************************************
-// Identity Intialization
+// Identity Initialization
 //**************************************************************************************************
 function initSessionIdentity() {
     debugMessage("Initializing identity...");
@@ -122,6 +154,6 @@ function setupIdentity(serverParm,nameParm,pemParm) {
     loggedInIdentityName = nameParm;
     loggedInPpkPem = pemParm;
     initSessionIdentity();
-    buildContactsMaps();
+    //buildContactsMaps();
     debugMessage("Identity set up.");
 }

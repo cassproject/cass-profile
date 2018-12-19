@@ -16,7 +16,12 @@ const INIT_IDENTITY_ACTION = "initIdentity";
 
 function performInitIdentityAction(data) {
     setupIdentity(data.serverParm,data.nameParm,data.pemParm);
-    loadPageContents();
+    identifyEcPersons(
+        function() {
+            loadPageContents();
+        }
+    );
+    //loadPageContents();
 }
 
 //**************************************************************************************************
