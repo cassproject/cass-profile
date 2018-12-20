@@ -101,7 +101,7 @@ var profileD3NodeString;
 
 var profileToOpen;
 
-
+var sourceNameMap = {};
 
 //**************************************************************************************************
 // Data Structures
@@ -519,6 +519,20 @@ function openAssertionTrustNetworkModal() {
     $(ASR_SRC_TRST_MODAL).foundation('open');
 }
 
+function registerAssertionSourceName(as) {
+    var sPkPem = as.getAgent().toPem();
+    if (!sourceNameMap[sPkPem]) {
+        sourceNameMap[sPkPem] = as.getAgentName();
+    }
+}
+
+function getAssertionSourceName(as) {
+    var sPkPem = as.getAgent().toPem();
+    if (sourceNameMap.hasOwnProperty(sPkPem)) {
+        return sourceNameMap[sPkPem];
+    }
+    else return as.getAgentName();
+}
 
 //**************************************************************************************************
 // Confidence Details Modal
@@ -2258,7 +2272,7 @@ function fetchAssertionCompetencyFrameworks() {
 function generateEvidenceSource(evidenceStr, as, evIdx) {
     var evPieces = evidenceStr.split("|");
     if (evPieces && evPieces.length == 4 && evPieces[0] == "ProfDemo") {
-        var evSource = new evidenceSource(evPieces[2], evPieces[1], as.getAgentName(), as.getAssertionDate(), as.getExpirationDate(), evPieces[3], as.shortId(), evIdx);
+        var evSource = new evidenceSource(evPieces[2], evPieces[1], getAssertionSourceName(as), as.getAssertionDate(), as.getExpirationDate(), evPieces[3], as.shortId(), evIdx);
         return evSource;
     }
     else {
@@ -2275,8 +2289,9 @@ function registerCredential(ev) {
 }
 
 function generateAssertionSourceInfo(as) {
+    registerAssertionSourceName(as);
     var asi = {};
-    asi.sourceName = as.getAgentName();
+    asi.sourceName = getAssertionSourceName(as);
     asi.sourcePkPem = as.getAgent().toPem();
     return asi;
 }
