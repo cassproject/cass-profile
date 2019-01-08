@@ -42,6 +42,8 @@ const CREATE_IMPLIED_RELATIONS = true;
 
 const DEFAULT_ASR_SOURCE_TRUST = 1;
 
+const DEFAULT_ASR_CONFIDENCE = 0;
+
 //**************************************************************************************************
 // Variables
 
@@ -305,15 +307,17 @@ function determineConfidenceForAssertions(asArray) {
         var asSourcePkPem = assertionSourcePkPemMap[as.shortId()];
         var sourceConf = getConfidenceInAssertionSource(asSourcePkPem);
         var neg = assertionNegativeMap[as.shortId()];
-        if (neg) conf = conf - (parseFloat(as.confidence) * sourceConf);
-        else conf += (parseFloat(as.confidence) * sourceConf);
+        var asrConf = parseFloat(as.confidence);
+        if (isNaN(asrConf)) asrConf = DEFAULT_ASR_CONFIDENCE;
+        if (neg) conf = conf - (asrConf * sourceConf);
+        else conf += (asrConf * sourceConf);
     });
     conf = Math.round((conf / asArray.length) * 100);
     return conf / 100;
 }
 
 function buildConfidenceTitle(confidence) {
-    return "Confidence: " + (confidence * 100) + "%";
+    return "Confidence: " + Math.round(confidence * 100) + "%";
 }
 
 function divideAssertionsBySource(asArray) {
@@ -330,11 +334,13 @@ function divideAssertionsBySource(asArray) {
 }
 
 function setUpCompetencyConfidenceView(confidence, iconId, cpdId) {
-    var confidenceValue = confidence * 100;
+    var conf = confidence;
+    if (isNaN(conf)) conf = DEFAULT_ASR_CONFIDENCE;
+    var confidenceValue = Math.round(conf * 100);
     $(iconId).text(confidenceValue);
-    $(iconId).attr("title", buildConfidenceTitle(confidence));
+    $(iconId).attr("title", buildConfidenceTitle(conf));
     $(iconId).attr("onclick","openConfidenceDetailsModal('" + escapeSingleQuote(cpdId) + "')");
-    $(iconId).addClass(getConfidenceClass(confidence));
+    $(iconId).addClass(getConfidenceClass(conf));
 }
 
 function buildConfidenceIcon(confidence) {
@@ -347,9 +353,11 @@ function buildConfidenceIcon(confidence) {
 function buildConfidenceIconForAssertion(as) {
     var asSourcePkPem = assertionSourcePkPemMap[as.shortId()];
     var sourceConf = getConfidenceInAssertionSource(asSourcePkPem);
-    var conf = as.confidence * sourceConf;
+    var asrConf = parseFloat(as.confidence);
+    if (isNaN(asrConf)) asrConf = DEFAULT_ASR_CONFIDENCE;
+    var conf = asrConf * sourceConf;
     var confStr = Math.round(conf * 100);
-    var htmlTitle = "Claim confidence (" + as.confidence + ") * Trust in claim source (" + sourceConf + ")";
+    var htmlTitle = "Claim confidence (" + asrConf + ") * Trust in claim source (" + sourceConf + ")";
     var retHtml = "&nbsp;&nbsp;" +
         "<span title=\"" + htmlTitle + "\" class=\"" + CONF_CLASS_BASE + " badge " + getConfidenceClass(conf) + "\">" + confStr + "</span>";
     return retHtml;
@@ -547,7 +555,9 @@ function addSourceAssertionsToConfidenceDetailList(source,sourceAssertionArray,c
         confTracker["totalNumberAsr"]++;
         var sourceAsStmtHtml;
         var confInAsrSource = getConfidenceInAssertionSource(assertionSourcePkPemMap[as.shortId()]);
-        var totalAsrConf = as.confidence * confInAsrSource;
+        var asrConf = parseFloat(as.confidence);
+        if (isNaN(asrConf)) asrConf = DEFAULT_ASR_CONFIDENCE;
+        var totalAsrConf = asrConf * confInAsrSource;
         var isNegativeAssertion = assertionNegativeMap[as.shortId()];
         if (isNegativeAssertion) {
             sourceAsStmtHtml = "does not hold ";
@@ -564,7 +574,7 @@ function addSourceAssertionsToConfidenceDetailList(source,sourceAssertionArray,c
         var asLiDivHtml = "<div class=\"cell medium-3\"><span class=\"confDetailListItem\">" + source + "</span></div>";
         asLiDivHtml += "<div class=\"cell medium-3\"><span class=\"confDetailListItem " + getHoldsNotHoldsConfDetailClass(isNegativeAssertion) + "\">" +
                         sourceAsStmtHtml + "</span></div>";
-        asLiDivHtml += "<div class=\"cell medium-2\"><span class=\"confDetailListItem\">" + confidenceToPercentage(as.confidence) + "</span></div>";
+        asLiDivHtml += "<div class=\"cell medium-2\"><span class=\"confDetailListItem\">" + confidenceToPercentage(asrConf) + "</span></div>";
         asLiDivHtml += "<div class=\"cell medium-2\"><span class=\"confDetailListItem\">" + confidenceToPercentage(confInAsrSource) + "</span></div>";
         asLiDivHtml += "<div class=\"cell medium-2\"><span class=\"confDetailListItem\">" + confidenceToPercentage(totalAsrConf) + "</span></div>";
         asLiDiv.html(asLiDivHtml);
@@ -803,7 +813,9 @@ function showAssertionDetailsModal(assertionId) {
     $(ASR_DTL_FW_CTR).html(buildFrameworkExplorerFrameworkHyperlinkListForCompetency(as.competency));
     buildAssertionDetailsLevel(as.level);
     buildAssertionDetailsHolds(assertionNegativeMap[assertionId]);
-    $(ASR_DTL_CONF).html((as.confidence * 100) + "%");
+    var asrConf = parseFloat(as.confidence);
+    if (isNaN(asrConf)) asrConf = DEFAULT_ASR_CONFIDENCE;
+    $(ASR_DTL_CONF).html((asrConf * 100) + "%");
     $(ASR_DTL_DATE).html(toDateString(new Date(as.getAssertionDate())));
     $(ASR_DTL_EXP).html(toDateString(new Date(as.getExpirationDate())));
     $(ASR_DTL_URL).html(generateAnchorLink(as.shortId(), "JSON", compName + " Assertion"));
@@ -1622,7 +1634,7 @@ function scrollToCompInListView(compName) {
 function generateCompetencyLineItemHtmlForListView(cpd, comp, frameworkName, hasChildren) {
     var asArray = getAssertionsForCompetencyPacketData(cpd);
     var conf = determineConfidenceForAssertions(asArray);
-    var confidenceValue = conf * 100;
+    var confidenceValue = Math.round(conf * 100);
     var liHtml = 
         "<span class=\"competency-type\">" + "<a onclick=\"openConfidenceDetailsModal('" + escapeSingleQuote(cpd.id) + "')\">" + "<span class=\"" + CONF_CLASS_BASE + " " + getConfidenceClass(conf) + "\" title=\"" + buildConfidenceTitle(conf) + "\" aria-hidden=\"true\">"  + confidenceValue +  "</span></a>"  + "&nbsp;&nbsp;&nbsp;" +
         "<a onclick=\"showCompetencyDetailsModal('" + escapeSingleQuote(comp.getId().trim()) + "');\">" +
