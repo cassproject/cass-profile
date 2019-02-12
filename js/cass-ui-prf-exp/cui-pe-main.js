@@ -1987,7 +1987,8 @@ function categorizeFrameworksForSummary() {
     $(applicableFrameworkList).each(function (i, fw) {
         var fnpg = frameworkNodePacketGraphMap[fw.shortId()];
         if (fnpg && fnpg != null) {
-            var fwn = fw.name.trim().toLowerCase();
+            //var fwn = fw.name.trim().toLowerCase();
+            var fwn = fw.getName().trim().toLowerCase();
             if (fwn.indexOf("programming") >= 0 ||
                 fwn.indexOf("database") >= 0 ||
                 fwn.indexOf("software") >= 0 ||
@@ -2018,7 +2019,8 @@ function addFrameworkCategoryToGraphProfileSummary(categoryName, fwArray) {
             "<i class=\"fa fa-chevron-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>" +
             "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(fw.name.trim()) + "_psi" + "\" " +
             "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(fw.shortId().trim()) + "',true)\">" +
-            fw.name.trim() + "</a>";
+            //fw.name.trim() + "</a>";
+            fw.getName().trim() + "</a>";
         fwLi.html(fwLiHtml);
         frameworkGraphSummaryLiMap[fw.shortId()] = fwLi;
         catUl.append(fwLi);
