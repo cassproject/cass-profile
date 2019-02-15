@@ -1,6 +1,36 @@
 # Change Log
 
-## [Unreleased](https://github.com/cassproject/cass-profile/tree/HEAD)
+## [1.0.6](https://github.com/cassproject/cass-profile/tree/1.0.6) (2019-02-15)
+[Full Changelog](https://github.com/cassproject/cass-profile/compare/1.0.5...1.0.6)
+
+**Fixed bugs:**
+
+- When working with competencies that have langstrings, an error occurs. [\#21](https://github.com/cassproject/cass-profile/issues/21)
+- Confidence of negative assertions [\#18](https://github.com/cassproject/cass-profile/issues/18)
+
+**Closed issues:**
+
+- EC 2.7 includes schema.org changes, Organization::member now Organization, not Person. [\#22](https://github.com/cassproject/cass-profile/issues/22)
+
+## [1.0.5](https://github.com/cassproject/cass-profile/tree/1.0.5) (2019-02-08)
+[Full Changelog](https://github.com/cassproject/cass-profile/compare/0.4.26...1.0.5)
+
+## [0.4.26](https://github.com/cassproject/cass-profile/tree/0.4.26) (2019-01-18)
+[Full Changelog](https://github.com/cassproject/cass-profile/compare/1.0.3...0.4.26)
+
+## [1.0.3](https://github.com/cassproject/cass-profile/tree/1.0.3) (2019-01-17)
+[Full Changelog](https://github.com/cassproject/cass-profile/compare/1.0.4...1.0.3)
+
+## [1.0.4](https://github.com/cassproject/cass-profile/tree/1.0.4) (2019-01-17)
+**Implemented enhancements:**
+
+- Some claims are invalid. Looks like every fourth? [\#14](https://github.com/cassproject/cass-profile/issues/14)
+
+**Fixed bugs:**
+
+- Build Person names based on family/given names fields if name is undefined [\#16](https://github.com/cassproject/cass-profile/issues/16)
+- Print and Export buttons don't do anything. [\#15](https://github.com/cassproject/cass-profile/issues/15)
+- Some claims are invalid. Looks like every fourth? [\#14](https://github.com/cassproject/cass-profile/issues/14)
 
 **Closed issues:**
 
