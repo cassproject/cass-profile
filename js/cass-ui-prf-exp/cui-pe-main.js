@@ -2017,7 +2017,7 @@ function addFrameworkCategoryToGraphProfileSummary(categoryName, fwArray) {
         var fwLi = $("<li/>");
         var fwLiHtml = "<a onclick=\"toggleGraphProfileSummaryChild($(this))\">" +
             "<i class=\"fa fa-chevron-right " + CIR_FCS_SUM_ITEM_CLASS_ID + "\" aria-hidden=\"true\"></i></a>" +
-            "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(fw.name.trim()) + "_psi" + "\" " +
+            "&nbsp;&nbsp;<a class=\"psiItem\" id=\"" + buildIDableString(fw.getName().trim()) + "_psi" + "\" " +
             "onclick=\"zoomExpCgByD3NodeId('" + escapeSingleQuote(fw.shortId().trim()) + "',true)\">" +
             //fw.name.trim() + "</a>";
             fw.getName().trim() + "</a>";
