@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.2.9](https://github.com/cassproject/cass-profile/tree/1.2.9) (2019-05-17)
+[Full Changelog](https://github.com/cassproject/cass-profile/compare/1.2.8...1.2.9)
+
 ## [1.2.8](https://github.com/cassproject/cass-profile/tree/1.2.8) (2019-05-10)
 [Full Changelog](https://github.com/cassproject/cass-profile/compare/1.2.7...1.2.8)
 
