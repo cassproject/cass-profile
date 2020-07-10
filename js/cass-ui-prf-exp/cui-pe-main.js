@@ -2494,7 +2494,7 @@ function handleGetAssertionsFailure(failMsg) {
 }
 
 function getAssertionSearchQueryForProfileUser() {
-    var searchQuery = "(\\*@reader:\"" + profileUserPkPem + "\" OR \"" + profileUserPkPem + "\")";
+    var searchQuery = "(\\*reader:\"" + profileUserPkPem + "\" OR \"" + profileUserPkPem + "\")";
     debugMessage("Assertion search query: " + searchQuery);
     return searchQuery;
 }
